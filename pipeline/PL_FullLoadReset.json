@@ -192,7 +192,16 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"storedProcedureName": "[dbo].[spPopulate_Sourcesystems]"
+					"storedProcedureName": "[dbo].[spPopulate_Sourcesystems]",
+					"storedProcedureParameters": {
+						"strEnvironment": {
+							"value": {
+								"value": "@pipeline().globalParameters.Environment",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
 				},
 				"linkedServiceName": {
 					"referenceName": "Control",
