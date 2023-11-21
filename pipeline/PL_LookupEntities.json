@@ -1392,6 +1392,279 @@
 												]
 											}
 										]
+									},
+									{
+										"value": "System User",
+										"activities": [
+											{
+												"name": "D365_SystemUser to SQL",
+												"type": "Copy",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "CommonDataServiceForAppsSource",
+														"query": {
+															"value": "@item().FetchXML",
+															"type": "Expression"
+														}
+													},
+													"sink": {
+														"type": "SqlServerSink",
+														"writeBehavior": "upsert",
+														"upsertSettings": {
+															"useTempDB": false,
+															"keys": [
+																"systemuserid"
+															]
+														},
+														"sqlWriterUseTableLock": false,
+														"tableOption": "autoCreate"
+													},
+													"enableStaging": false,
+													"translator": {
+														"type": "TabularTranslator",
+														"mappings": [
+															{
+																"source": {
+																	"name": "systemuserid",
+																	"type": "Guid"
+																},
+																"sink": {
+																	"name": "systemuserid",
+																	"type": "Guid"
+																}
+															},
+															{
+																"source": {
+																	"name": "internalemailaddress",
+																	"type": "String"
+																},
+																"sink": {
+																	"name": "internalemailaddress",
+																	"type": "String"
+																}
+															},
+															{
+																"source": {
+																	"name": "fullname",
+																	"type": "String"
+																},
+																"sink": {
+																	"name": "fullname",
+																	"type": "String"
+																}
+															},
+															{
+																"source": {
+																	"name": "createdon",
+																	"type": "DateTime"
+																},
+																"sink": {
+																	"name": "createdon",
+																	"type": "DateTime"
+																}
+															},
+															{
+																"source": {
+																	"name": "createdby",
+																	"type": "Guid"
+																},
+																"sink": {
+																	"name": "createdby",
+																	"type": "String"
+																}
+															},
+															{
+																"source": {
+																	"name": "modifiedon",
+																	"type": "DateTime"
+																},
+																"sink": {
+																	"name": "modifiedon",
+																	"type": "DateTime"
+																}
+															},
+															{
+																"source": {
+																	"name": "modifiedby",
+																	"type": "Guid"
+																},
+																"sink": {
+																	"name": "modifiedby",
+																	"type": "String"
+																}
+															}
+														]
+													}
+												},
+												"inputs": [
+													{
+														"referenceName": "DS_Dataverse",
+														"type": "DatasetReference",
+														"parameters": {
+															"EntityName": "systemuser"
+														}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "DS_SQL_OnPrem_Tbl",
+														"type": "DatasetReference",
+														"parameters": {
+															"ServerName": {
+																"value": "@item().DestServer",
+																"type": "Expression"
+															},
+															"DatabaseName": {
+																"value": "@item().DestDatabase",
+																"type": "Expression"
+															},
+															"SchemaName": {
+																"value": "@item().DestSchema",
+																"type": "Expression"
+															},
+															"TableName": {
+																"value": "@item().DestEntity",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											},
+											{
+												"name": "PipelineParameters LogEnd - SystemUser",
+												"type": "SqlServerStoredProcedure",
+												"dependsOn": [
+													{
+														"activity": "D365_SystemUser to SQL",
+														"dependencyConditions": [
+															"Completed"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"storedProcedureName": "[dbo].[spUpdate_PipelineParameters_LogEnd]",
+													"storedProcedureParameters": {
+														"dtLastPipelineRunEnd": {
+															"value": {
+																"value": "@{utcnow()}",
+																"type": "Expression"
+															},
+															"type": "DateTime"
+														},
+														"strEntity": {
+															"value": {
+																"value": "@item().Entity",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strLastPipelineRunStatus": {
+															"value": {
+																"value": "@{activity('D365_SystemUser to SQL').output.executionDetails[0].status}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strSourceSystem": {
+															"value": {
+																"value": "@item().SrcSystem",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strEntityType": {
+															"value": {
+																"value": "@item().EntityType",
+																"type": "Expression"
+															},
+															"type": "String"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "Control",
+													"type": "LinkedServiceReference"
+												}
+											},
+											{
+												"name": "PipelineAuditDetailLog_2 SystemUser",
+												"type": "Copy",
+												"dependsOn": [
+													{
+														"activity": "D365_SystemUser to SQL",
+														"dependencyConditions": [
+															"Completed"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "AzureSqlSource",
+														"sqlReaderQuery": {
+															"value": "SELECT \n\n'@{pipeline().DataFactory}' as DataFactoryName,\n'@{pipeline().Pipeline}' as PipelineName,\n'@{pipeline().RunId}' as RunID,\n\n'@{item().SrcSystem}' as SrcSystem,\n'@{item().SrcTable}' as Source,\n'@{item().DestEntity}' as Destination,\n'Transformed to Destination' as CopyActivity,\n\n'@{pipeline().TriggerType}' as TriggerType,\n'@{pipeline().TriggerId}' as TriggerID,\n'@{pipeline().TriggerName}' as TriggerName,\n'@{pipeline().TriggerTime}' as TriggerTime,\n\n'@{activity('D365_SystemUser to SQL').output.rowsCopied}' as RowsCopied,\n'@{activity('D365_SystemUser to SQL').output.rowsRead}' as RowsRead,\n0 as RowsSkipped,\n'@{activity('D365_SystemUser to SQL').output.usedParallelCopies}' as ParallelCopies,\n'@{activity('D365_SystemUser to SQL').output.copyDuration}' as CopyDuration_SS,\n'@{activity('D365_SystemUser to SQL').output.effectiveIntegrationRuntime}' as EffectiveIntegrationRuntime,\n\n'@{activity('D365_SystemUser to SQL').output.executionDetails[0].source.type}' as SourceType,\n'@{activity('D365_SystemUser to SQL').output.executionDetails[0].sink.type}' as SinkType,\n'@{activity('D365_SystemUser to SQL').output.executionDetails[0].status}' as ExecutionStatus,\n'@{activity('D365_SystemUser to SQL').output.executionDetails[0].start}' as CopyActivity_StartTime,\n'@{utcnow()}' as CopyActivity_EndTime,\n'@{activity('D365_SystemUser to SQL').output.executionDetails[0].detailedDurations.queuingDuration}' as CopyActivity_QueuingDuration_SS,\n'@{activity('D365_SystemUser to SQL').output.executionDetails[0].detailedDurations.queuingDuration}' as CopyActivity_TimeToFirstByte_SS,\n'@{activity('D365_SystemUser to SQL').output.executionDetails[0].detailedDurations.transferDuration}' as CopyActivity_TransferDuration_SS,\n2 as CopyActivity_Stage,\n'@{pipeline().parameters.SequenceGroup}' as SequenceGroup\n\n",
+															"type": "Expression"
+														},
+														"queryTimeout": "02:00:00",
+														"partitionOption": "None"
+													},
+													"sink": {
+														"type": "AzureSqlSink",
+														"writeBehavior": "insert",
+														"sqlWriterUseTableLock": false
+													},
+													"enableStaging": false,
+													"translator": {
+														"type": "TabularTranslator",
+														"typeConversion": true,
+														"typeConversionSettings": {
+															"allowDataTruncation": true,
+															"treatBooleanAsNumber": false
+														}
+													}
+												},
+												"inputs": [
+													{
+														"referenceName": "DS_SQL_Control",
+														"type": "DatasetReference"
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "DS_SQL_Control_Tbl",
+														"type": "DatasetReference",
+														"parameters": {
+															"SchemaName": "dbo",
+															"TableName": "PipelineAuditDetailLog"
+														}
+													}
+												]
+											}
+										]
 									}
 								]
 							}
