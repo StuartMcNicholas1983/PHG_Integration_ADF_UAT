@@ -1,0 +1,27 @@
+{
+	"name": "SqlServer_OnPrem",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"parameters": {
+			"ServerName": {
+				"type": "string",
+				"defaultValue": "BBP-PRO2SQL-01\\PRO2SQLTEST"
+			},
+			"DatabaseName": {
+				"type": "string",
+				"defaultValue": "Pro2_IH"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": "integrated security=True;data source=@{linkedService().ServerName};initial catalog=@{linkedService().DatabaseName}",
+			"userName": "GROUPICT\\stuart.mcnicholas",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIwYjk1ZGMwMS1lNWIyLTQ2OTctYjJjYS03ODQ2MjFlM2JiYjMiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "BBP-Pro2SQL-01",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

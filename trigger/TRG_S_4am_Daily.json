@@ -1,0 +1,39 @@
+{
+	"name": "TRG_S_4am_Daily",
+	"properties": {
+		"annotations": [
+			"Sequence List: [R],[L],[C],[T]"
+		],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Control",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"PipelineName": "OH_D365_DataSync",
+					"SequenceList": "[L],[R],[C],[T]",
+					"LoadType": "Daily"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-11-20T06:00:00",
+				"timeZone": "GMT Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						4
+					]
+				}
+			}
+		}
+	}
+}

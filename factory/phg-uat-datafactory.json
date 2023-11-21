@@ -1,0 +1,17 @@
+{
+	"name": "phg-uat-datafactory",
+	"properties": {
+		"globalParameters": {
+			"Environment": {
+				"type": "string",
+				"value": "UAT"
+			}
+		}
+	},
+	"location": "ukwest",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "3acf8084-452d-4113-8865-ddb6b3a7a51b",
+		"tenantId": "668364d4-3d43-4051-adbc-5bbb517a46fc"
+	}
+}

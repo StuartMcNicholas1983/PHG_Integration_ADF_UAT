@@ -1,0 +1,82 @@
+{
+	"name": "DS_Excel_LocalAuthorities",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "DataLake",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Container": {
+				"type": "string",
+				"defaultValue": "data-sync"
+			},
+			"Directory": {
+				"type": "string",
+				"defaultValue": "OH_D365_DataSync/Config"
+			},
+			"Filename": {
+				"type": "string",
+				"defaultValue": "LocalAuthorities_F.xlsx"
+			}
+		},
+		"folder": {
+			"name": "DataLake/Config"
+		},
+		"annotations": [],
+		"type": "Excel",
+		"typeProperties": {
+			"sheetName": "LocalAuthorities",
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().Filename",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().Directory",
+					"type": "Expression"
+				},
+				"fileSystem": {
+					"value": "@dataset().Container",
+					"type": "Expression"
+				}
+			},
+			"firstRowAsHeader": true
+		},
+		"schema": [
+			{
+				"name": "SourceSystem",
+				"type": "String"
+			},
+			{
+				"name": "SourceSchema",
+				"type": "String"
+			},
+			{
+				"name": "SourceTable",
+				"type": "String"
+			},
+			{
+				"name": "SourceCode",
+				"type": "String"
+			},
+			{
+				"name": "Entity",
+				"type": "String"
+			},
+			{
+				"name": "EntityQualifiedName",
+				"type": "String"
+			},
+			{
+				"name": "EntityCode",
+				"type": "String"
+			},
+			{
+				"name": "EntityValue",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

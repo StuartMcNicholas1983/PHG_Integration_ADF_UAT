@@ -1,0 +1,12 @@
+{
+	"name": "Control",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"connectionString": "integrated security=False;encrypt=True;connection timeout=30;data source=phg-uat-sqlserver.database.windows.net;initial catalog=phg-uat-control;user id=CloudSA8c7deb42",
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQDY5MDhDQ0E4LUVCMTktNEIxNC1CQzY0LTNEMEMxM0Y3NjFDMF85MDJkNjNkMS00Yjc2LTQ3NGItYTY0Mi1hNjFiMWNjMDUzOGQiDQp9"
+		}
+	}
+}

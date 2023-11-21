@@ -1,0 +1,12 @@
+{
+	"name": "BBP-Pro2SQL-01",
+	"properties": {
+		"type": "SelfHosted",
+		"typeProperties": {
+			"linkedInfo": {
+				"resourceId": "/subscriptions/83e38fc3-11f8-44f0-87d5-048acb1450dc/resourcegroups/PHG-Intergration/providers/Microsoft.DataFactory/factories/phg-eval-datafactory/integrationruntimes/BBP-Pro2SQL-01",
+				"authorizationType": "Rbac"
+			}
+		}
+	}
+}

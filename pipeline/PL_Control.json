@@ -1,0 +1,1388 @@
+{
+	"name": "PL_Control",
+	"properties": {
+		"activities": [
+			{
+				"name": "SG - Reference",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "SequenceGroup - Lookup",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "SG - Lookup",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[dbo].[spGet_PipelineParameters_SequenceGroups]",
+						"storedProcedureParameters": {
+							"entityType": {
+								"type": "String",
+								"value": "Reference"
+							},
+							"pipeline": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.PipelineName",
+									"type": "Expression"
+								}
+							},
+							"isSequence": {
+								"type": "Boolean",
+								"value": {
+									"value": "@greaterOrEquals(indexOf(pipeline().parameters.SequenceList,'[R]'),0)\n",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_SQL_Control",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "SequenceGroup - Reference",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "SG - Reference",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('SG - Reference').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Reference Entities",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_ReferenceEntities",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"PipelineName": {
+										"value": "@item().Pipeline",
+										"type": "Expression"
+									},
+									"SourceSystemName": {
+										"value": "@item().SrcSystem",
+										"type": "Expression"
+									},
+									"SequenceGroup": {
+										"value": "@item().SequenceGroup",
+										"type": "Expression"
+									},
+									"LoadType": {
+										"value": "@pipeline().parameters.LoadType",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "SG - Core_A",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "SequenceGroup - Reference",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "SG - Reference",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[dbo].[spGet_PipelineParameters_SequenceGroups]",
+						"storedProcedureParameters": {
+							"entityType": {
+								"type": "String",
+								"value": "Core_A"
+							},
+							"pipeline": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.PipelineName",
+									"type": "Expression"
+								}
+							},
+							"isSequence": {
+								"type": "Boolean",
+								"value": {
+									"value": "@greaterOrEquals(indexOf(pipeline().parameters.SequenceList,'[C]'),0)\n",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_SQL_Control",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "SequenceGroup - Core_A",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "SG - Core_A",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('SG - Core_A').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Core Entities_A",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_CoreEntities_A",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"PipelineName": {
+										"value": "@item().Pipeline",
+										"type": "Expression"
+									},
+									"SourceSystemName": {
+										"value": "@item().SrcSystem",
+										"type": "Expression"
+									},
+									"SequenceGroup": {
+										"value": "@item().SequenceGroup",
+										"type": "Expression"
+									},
+									"LoadType": {
+										"value": "@pipeline().parameters.LoadType",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "Core A - AuditLog",
+							"description": "exec [spInsert_Core_A_AuditLog]",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Core Entities_A",
+									"dependencyConditions": [
+										"Completed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[adf].[spInsert_Core_A_AuditLog]"
+							},
+							"linkedServiceName": {
+								"referenceName": "SqlServer_OnPrem",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"ServerName": {
+										"value": "@item().SrcServer",
+										"type": "Expression"
+									},
+									"DatabaseName": {
+										"value": "@item().SrcDatabase",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "SG - Lookup",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "LoadType",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[dbo].[spGet_PipelineParameters_SequenceGroups]",
+						"storedProcedureParameters": {
+							"entityType": {
+								"type": "String",
+								"value": "Lookup"
+							},
+							"pipeline": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.PipelineName",
+									"type": "Expression"
+								}
+							},
+							"isSequence": {
+								"type": "Boolean",
+								"value": {
+									"value": "@greaterOrEquals(indexOf(pipeline().parameters.SequenceList,'[L]'),0)\n",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_SQL_Control",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "SequenceGroup - Lookup",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "SG - Lookup",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('SG - Lookup').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Lookup Entities",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_LookupEntities",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"PipelineName": {
+										"value": "@item().Pipeline",
+										"type": "Expression"
+									},
+									"SourceSystemName": {
+										"value": "@item().SrcSystem",
+										"type": "Expression"
+									},
+									"SequenceGroup": {
+										"value": "@item().SequenceGroup",
+										"type": "Expression"
+									},
+									"LoadType": {
+										"value": "@pipeline().parameters.LoadType",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "SG - Delete",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "SequenceGroup - Transactional",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "SG - Transactional",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[dbo].[spGet_PipelineParameters_SequenceGroups]",
+						"storedProcedureParameters": {
+							"entityType": {
+								"type": "String",
+								"value": "Delete"
+							},
+							"pipeline": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.PipelineName",
+									"type": "Expression"
+								}
+							},
+							"isSequence": {
+								"type": "Boolean",
+								"value": {
+									"value": "@greaterOrEquals(indexOf(pipeline().parameters.SequenceList,'[D]'),0)\n",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_SQL_Control",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "SequenceGroup - Delete",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "SG - Delete",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('SG - Delete').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Delete Entities",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_DeleteEntities",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"PipelineName": {
+										"value": "@item().Pipeline",
+										"type": "Expression"
+									},
+									"SourceSystemName": {
+										"value": "@item().SrcSystem",
+										"type": "Expression"
+									},
+									"SequenceGroup": {
+										"value": "@item().SequenceGroup",
+										"type": "Expression"
+									},
+									"LoadType": {
+										"value": "@pipeline().parameters.LoadType",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "SG - Transactional",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "SequenceGroup - Core_C",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "SG - Core_C",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[dbo].[spGet_PipelineParameters_SequenceGroups]",
+						"storedProcedureParameters": {
+							"entityType": {
+								"type": "String",
+								"value": "Transactional"
+							},
+							"pipeline": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.PipelineName",
+									"type": "Expression"
+								}
+							},
+							"isSequence": {
+								"type": "Boolean",
+								"value": {
+									"value": "@greaterOrEquals(indexOf(pipeline().parameters.SequenceList,'[T]'),0)\n",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_SQL_Control",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "SequenceGroup - Transactional",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "SG - Transactional",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('SG - Transactional').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Transactional Entities",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_TransactionalEntities",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"PipelineName": {
+										"value": "@item().Pipeline",
+										"type": "Expression"
+									},
+									"SourceSystemName": {
+										"value": "@item().SrcSystem",
+										"type": "Expression"
+									},
+									"SequenceGroup": {
+										"value": "@item().SequenceGroup",
+										"type": "Expression"
+									},
+									"LoadType": {
+										"value": "@pipeline().parameters.LoadType",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "RunStart",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "RunStart",
+					"value": {
+						"value": "@string(utcNow())",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "RunEnd",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "SequenceGroup - Inactive",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "RunEnd",
+					"value": {
+						"value": "@string(utcNow())",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Duration_SS",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "RunEnd",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "Duration_SS",
+					"value": {
+						"value": "@string(div(sub(ticks(formatDateTime(variables('RunEnd'))),ticks(formatDateTime(variables('RunStart')))),10000000))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "SG - Core_B",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "SequenceGroup - Core_A",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "SG - Core_A",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[dbo].[spGet_PipelineParameters_SequenceGroups]",
+						"storedProcedureParameters": {
+							"entityType": {
+								"type": "String",
+								"value": "Core_B"
+							},
+							"pipeline": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.PipelineName",
+									"type": "Expression"
+								}
+							},
+							"isSequence": {
+								"type": "Boolean",
+								"value": {
+									"value": "@greaterOrEquals(indexOf(pipeline().parameters.SequenceList,'[C]'),0)\n",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_SQL_Control",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "SequenceGroup - Core_B",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "SG - Core_B",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('SG - Core_B').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Core_B Entities",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_CoreEntities_B",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"PipelineName": {
+										"value": "@item().Pipeline",
+										"type": "Expression"
+									},
+									"SourceSystemName": {
+										"value": "@item().SrcSystem",
+										"type": "Expression"
+									},
+									"SequenceGroup": {
+										"value": "@item().SequenceGroup",
+										"type": "Expression"
+									},
+									"LoadType": {
+										"value": "@pipeline().parameters.LoadType",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "Core B - AuditLog",
+							"description": "exec [spInsert_Core_B_AuditLog]",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Core_B Entities",
+									"dependencyConditions": [
+										"Completed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[adf].[spInsert_Core_B_AuditLog]"
+							},
+							"linkedServiceName": {
+								"referenceName": "SqlServer_OnPrem",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"ServerName": {
+										"value": "@item().SrcServer",
+										"type": "Expression"
+									},
+									"DatabaseName": {
+										"value": "@item().SrcDatabase",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "SG - Core_C",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "SequenceGroup - Core_B",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "SG - Core_B",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[dbo].[spGet_PipelineParameters_SequenceGroups]",
+						"storedProcedureParameters": {
+							"entityType": {
+								"type": "String",
+								"value": "Core_C"
+							},
+							"pipeline": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.PipelineName",
+									"type": "Expression"
+								}
+							},
+							"isSequence": {
+								"type": "Boolean",
+								"value": {
+									"value": "@greaterOrEquals(indexOf(pipeline().parameters.SequenceList,'[C]'),0)\n",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_SQL_Control",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "SequenceGroup - Core_C",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "SG - Core_C",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('SG - Core_C').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Core_C Entities",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_CoreEntities_C",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"PipelineName": {
+										"value": "@item().Pipeline",
+										"type": "Expression"
+									},
+									"SourceSystemName": {
+										"value": "@item().SrcSystem",
+										"type": "Expression"
+									},
+									"SequenceGroup": {
+										"value": "@item().SequenceGroup",
+										"type": "Expression"
+									},
+									"LoadType": {
+										"value": "@pipeline().parameters.LoadType",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "Core C - AuditLog",
+							"description": "exec [spInsert_Core_C_AuditLog]",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Core_C Entities",
+									"dependencyConditions": [
+										"Completed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[adf].[spInsert_Core_C_AuditLog]"
+							},
+							"linkedServiceName": {
+								"referenceName": "SqlServer_OnPrem",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"ServerName": {
+										"value": "@item().SrcServer",
+										"type": "Expression"
+									},
+									"DatabaseName": {
+										"value": "@item().SrcDatabase",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "LoadType",
+				"type": "Switch",
+				"dependsOn": [
+					{
+						"activity": "RunStart",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"on": {
+						"value": "@pipeline().parameters.LoadType",
+						"type": "Expression"
+					},
+					"cases": [
+						{
+							"value": "Full",
+							"activities": [
+								{
+									"name": "Full Load Reset",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_FullLoadReset",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"PipelineName": {
+												"value": "@pipeline().parameters.PipelineName",
+												"type": "Expression"
+											},
+											"LoadType": {
+												"value": "@pipeline().parameters.LoadType",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						},
+						{
+							"value": "Incremental",
+							"activities": [
+								{
+									"name": "Control - Reset PipelineRunsToday - Incremental",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[dbo].[spUpdate_PipelineParameters_PipelineRunsToday]"
+									},
+									"linkedServiceName": {
+										"referenceName": "Control",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						},
+						{
+							"value": "Daily",
+							"activities": [
+								{
+									"name": "Daily Reset",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_DailyReset",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"PipelineName": {
+												"value": "@pipeline().parameters.PipelineName",
+												"type": "Expression"
+											},
+											"LoadType": {
+												"value": "@pipeline().parameters.LoadType",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "PipelineAuditLog - Start",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "RunStart",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[spInsert_PipelineAuditLog_Start]",
+					"storedProcedureParameters": {
+						"dtRunStart": {
+							"value": {
+								"value": "@variables('RunStart')",
+								"type": "Expression"
+							},
+							"type": "DateTime"
+						},
+						"dtTriggerTime": {
+							"value": {
+								"value": "@{pipeline().TriggerTime}",
+								"type": "Expression"
+							},
+							"type": "DateTime"
+						},
+						"strDataFactory": {
+							"value": {
+								"value": "@{pipeline().DataFactory}",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"strPipeline": {
+							"value": {
+								"value": "@{pipeline().Pipeline}",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"strStatus": {
+							"value": "In Progress",
+							"type": "String"
+						},
+						"strTriggeredByPipelineName": {
+							"value": {
+								"value": "@{pipeline()?.TriggeredByPipelineName}",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"strTriggeredByPipelineRunID": {
+							"value": {
+								"value": "@{pipeline()?.TriggeredByPipelineRunId}",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"strTriggerName": {
+							"value": {
+								"value": "@{pipeline().TriggerName}",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"strTriggerType": {
+							"value": {
+								"value": "@{pipeline().TriggerType}",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"uniqGroupID": {
+							"value": {
+								"value": "@{pipeline().GroupId}",
+								"type": "Expression"
+							},
+							"type": "Guid"
+						},
+						"uniqRunID": {
+							"value": {
+								"value": "@{pipeline().RunId}",
+								"type": "Expression"
+							},
+							"type": "Guid"
+						},
+						"uniqTriggerID": {
+							"value": {
+								"value": "@guid()",
+								"type": "Expression"
+							},
+							"type": "Guid"
+						},
+						"strSequenceList": {
+							"value": {
+								"value": "@pipeline().parameters.SequenceList",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"strLoadType": {
+							"value": {
+								"value": "@pipeline().parameters.LoadType",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Control",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "PipelineAuditLog - End",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Duration_SS",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[spUpdate_PipelineAuditLog_End]",
+					"storedProcedureParameters": {
+						"dtRunEnd": {
+							"value": {
+								"value": "@variables('RunEnd')",
+								"type": "Expression"
+							},
+							"type": "DateTime"
+						},
+						"intDuration_SS": {
+							"value": {
+								"value": "@variables('Duration_SS')",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"strStatus": {
+							"value": "Succeeded",
+							"type": "String"
+						},
+						"uniqRunID": {
+							"value": {
+								"value": "@pipeline().RunId",
+								"type": "Expression"
+							},
+							"type": "Guid"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Control",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "SG - Inactive",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "SequenceGroup - Delete",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "SG - Delete",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[dbo].[spGet_PipelineParameters_SequenceGroups]",
+						"storedProcedureParameters": {
+							"entityType": {
+								"type": "String",
+								"value": "Inactive"
+							},
+							"pipeline": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.PipelineName",
+									"type": "Expression"
+								}
+							},
+							"isSequence": {
+								"type": "Boolean",
+								"value": {
+									"value": "@greaterOrEquals(indexOf(pipeline().parameters.SequenceList,'[I]'),0)\n",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_SQL_Control",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "SequenceGroup - Inactive",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "SG - Inactive",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('SG - Inactive').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Inactive Entities",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_InactiveEntities",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"PipelineName": {
+										"value": "@item().Pipeline",
+										"type": "Expression"
+									},
+									"SourceSystemName": {
+										"value": "@item().SrcSystem",
+										"type": "Expression"
+									},
+									"SequenceGroup": {
+										"value": "@item().SequenceGroup",
+										"type": "Expression"
+									},
+									"LoadType": {
+										"value": "@pipeline().parameters.LoadType",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"concurrency": 1,
+		"parameters": {
+			"PipelineName": {
+				"type": "string",
+				"defaultValue": "OH_D365_DataSync"
+			},
+			"SequenceList": {
+				"type": "string",
+				"defaultValue": "[L],[R],[C],[T],[D],[I]"
+			},
+			"LoadType": {
+				"type": "string",
+				"defaultValue": "Full,Incremental,Daily"
+			}
+		},
+		"variables": {
+			"RunStart": {
+				"type": "String"
+			},
+			"RunEnd": {
+				"type": "String"
+			},
+			"Duration_SS": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "OH_D365_DataSync"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-11-19T16:58:35Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

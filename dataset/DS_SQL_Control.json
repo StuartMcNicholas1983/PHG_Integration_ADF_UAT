@@ -1,0 +1,16 @@
+{
+	"name": "DS_SQL_Control",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Control",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "SQL Server"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

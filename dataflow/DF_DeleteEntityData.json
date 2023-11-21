@@ -1,0 +1,62 @@
+{
+	"name": "DF_DeleteEntityData",
+	"properties": {
+		"folder": {
+			"name": "OH_D365_DataSync/Delete"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_Datalake_PipeDelimited",
+						"type": "DatasetReference"
+					},
+					"name": "DeletionData"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DS_Dataverse",
+						"type": "DatasetReference"
+					},
+					"name": "SinkDelete"
+				}
+			],
+			"transformations": [
+				{
+					"name": "AlterRowProperty"
+				},
+				{
+					"name": "SelectColumn"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Entity as string,",
+				"          phg_integrationkey as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> DeletionData",
+				"SelectColumn alterRow(deleteIf(true())) ~> AlterRowProperty",
+				"DeletionData select(mapColumn(",
+				"          phg_integrationkey",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SelectColumn",
+				"AlterRowProperty sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:true,",
+				"     insertable:false,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     alternateKeyName: 'phg_integrationkey',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 0) ~> SinkDelete"
+			]
+		}
+	}
+}

@@ -1,0 +1,39 @@
+{
+	"name": "TRG_S_8pm_Incremental",
+	"properties": {
+		"annotations": [
+			"Sequence List: [D],[I]"
+		],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Control",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"PipelineName": "OH_D365_DataSync",
+					"SequenceList": "[D],[I]",
+					"LoadType": "Incremental"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-11-20T09:07:00",
+				"timeZone": "GMT Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						20
+					]
+				}
+			}
+		}
+	}
+}
