@@ -1,0 +1,189 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "phg-uat-datafactory"
+		},
+		"Control_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Control'"
+		},
+		"DataLake_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'DataLake'"
+		},
+		"Dataverse_servicePrincipalCredential": {
+			"type": "secureString",
+			"metadata": "Secure string for 'servicePrincipalCredential' of 'Dataverse'"
+		},
+		"SqlServer_OnPrem_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'SqlServer_OnPrem'",
+			"defaultValue": "Integrated Security=True;Data Source=@{linkedService().ServerName};Initial Catalog=@{linkedService().DatabaseName}"
+		},
+		"SqlServer_OnPrem_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'SqlServer_OnPrem'"
+		},
+		"DataLake_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://phguatstoragedatalake.dfs.core.windows.net/"
+		},
+		"Dataverse_properties_typeProperties_servicePrincipalId": {
+			"type": "string",
+			"defaultValue": "1bafd450-9ac7-4646-b5d1-7dd54a8a6502"
+		},
+		"SqlServer_OnPrem_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "GROUPICT\\stuart.mcnicholas"
+		},
+		"TRG_S_4am_Daily_properties_PL_Control_parameters_PipelineName": {
+			"type": "string",
+			"defaultValue": "OH_D365_DataSync"
+		},
+		"TRG_S_4am_Daily_properties_PL_Control_parameters_SequenceList": {
+			"type": "string",
+			"defaultValue": "[[L],[R],[C],[T]"
+		},
+		"TRG_S_4am_Daily_properties_PL_Control_parameters_LoadType": {
+			"type": "string",
+			"defaultValue": "Daily"
+		},
+		"TRG_S_7am_to_5pm_Incremental_properties_PL_Control_parameters_PipelineName": {
+			"type": "string",
+			"defaultValue": "OH_D365_DataSync"
+		},
+		"TRG_S_7am_to_5pm_Incremental_properties_PL_Control_parameters_SequenceList": {
+			"type": "string",
+			"defaultValue": "[[C],[T]"
+		},
+		"TRG_S_7am_to_5pm_Incremental_properties_PL_Control_parameters_LoadType": {
+			"type": "string",
+			"defaultValue": "Incremental"
+		},
+		"TRG_S_8pm_Incremental_properties_PL_Control_parameters_PipelineName": {
+			"type": "string",
+			"defaultValue": "OH_D365_DataSync"
+		},
+		"TRG_S_8pm_Incremental_properties_PL_Control_parameters_SequenceList": {
+			"type": "string",
+			"defaultValue": "[[D],[I]"
+		},
+		"TRG_S_8pm_Incremental_properties_PL_Control_parameters_LoadType": {
+			"type": "string",
+			"defaultValue": "Incremental"
+		},
+		"BBP-Pro2SQL-01_properties_typeProperties_linkedInfo_resourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/83e38fc3-11f8-44f0-87d5-048acb1450dc/resourcegroups/PHG-Intergration/providers/Microsoft.DataFactory/factories/phg-eval-datafactory/integrationruntimes/BBP-Pro2SQL-01"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "phg-uat-datafactory_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"Control_connectionString": {
+						"value": "[parameters('Control_connectionString')]"
+					},
+					"DataLake_accountKey": {
+						"value": "[parameters('DataLake_accountKey')]"
+					},
+					"Dataverse_servicePrincipalCredential": {
+						"value": "[parameters('Dataverse_servicePrincipalCredential')]"
+					},
+					"SqlServer_OnPrem_connectionString": {
+						"value": "[parameters('SqlServer_OnPrem_connectionString')]"
+					},
+					"SqlServer_OnPrem_password": {
+						"value": "[parameters('SqlServer_OnPrem_password')]"
+					},
+					"DataLake_properties_typeProperties_url": {
+						"value": "[parameters('DataLake_properties_typeProperties_url')]"
+					},
+					"Dataverse_properties_typeProperties_servicePrincipalId": {
+						"value": "[parameters('Dataverse_properties_typeProperties_servicePrincipalId')]"
+					},
+					"BBP-Pro2SQL-01_properties_typeProperties_linkedInfo_resourceId": {
+						"value": "[parameters('BBP-Pro2SQL-01_properties_typeProperties_linkedInfo_resourceId')]"
+					},
+					"SqlServer_OnPrem_properties_typeProperties_userName": {
+						"value": "[parameters('SqlServer_OnPrem_properties_typeProperties_userName')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "phg-uat-datafactory_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"TRG_S_4am_Daily_properties_PL_Control_parameters_PipelineName": {
+						"value": "[parameters('TRG_S_4am_Daily_properties_PL_Control_parameters_PipelineName')]"
+					},
+					"TRG_S_4am_Daily_properties_PL_Control_parameters_SequenceList": {
+						"value": "[parameters('TRG_S_4am_Daily_properties_PL_Control_parameters_SequenceList')]"
+					},
+					"TRG_S_4am_Daily_properties_PL_Control_parameters_LoadType": {
+						"value": "[parameters('TRG_S_4am_Daily_properties_PL_Control_parameters_LoadType')]"
+					},
+					"TRG_S_7am_to_5pm_Incremental_properties_PL_Control_parameters_PipelineName": {
+						"value": "[parameters('TRG_S_7am_to_5pm_Incremental_properties_PL_Control_parameters_PipelineName')]"
+					},
+					"TRG_S_7am_to_5pm_Incremental_properties_PL_Control_parameters_SequenceList": {
+						"value": "[parameters('TRG_S_7am_to_5pm_Incremental_properties_PL_Control_parameters_SequenceList')]"
+					},
+					"TRG_S_7am_to_5pm_Incremental_properties_PL_Control_parameters_LoadType": {
+						"value": "[parameters('TRG_S_7am_to_5pm_Incremental_properties_PL_Control_parameters_LoadType')]"
+					},
+					"TRG_S_8pm_Incremental_properties_PL_Control_parameters_PipelineName": {
+						"value": "[parameters('TRG_S_8pm_Incremental_properties_PL_Control_parameters_PipelineName')]"
+					},
+					"TRG_S_8pm_Incremental_properties_PL_Control_parameters_SequenceList": {
+						"value": "[parameters('TRG_S_8pm_Incremental_properties_PL_Control_parameters_SequenceList')]"
+					},
+					"TRG_S_8pm_Incremental_properties_PL_Control_parameters_LoadType": {
+						"value": "[parameters('TRG_S_8pm_Incremental_properties_PL_Control_parameters_LoadType')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'phg-uat-datafactory_ArmTemplate_0')]"
+			]
+		}
+	]
+}

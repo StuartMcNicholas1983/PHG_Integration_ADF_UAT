@@ -1,0 +1,69 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "phg-uat-datafactory"
+		},
+		"Control_connectionString": {
+			"value": ""
+		},
+		"DataLake_accountKey": {
+			"value": ""
+		},
+		"Dataverse_servicePrincipalCredential": {
+			"value": ""
+		},
+		"SqlServer_OnPrem_connectionString": {
+			"value": "Integrated Security=True;Data Source=@{linkedService().ServerName};Initial Catalog=@{linkedService().DatabaseName}"
+		},
+		"SqlServer_OnPrem_password": {
+			"value": ""
+		},
+		"DataLake_properties_typeProperties_url": {
+			"value": "https://phguatstoragedatalake.dfs.core.windows.net/"
+		},
+		"Dataverse_properties_typeProperties_servicePrincipalId": {
+			"value": "1bafd450-9ac7-4646-b5d1-7dd54a8a6502"
+		},
+		"SqlServer_OnPrem_properties_typeProperties_userName": {
+			"value": "GROUPICT\\stuart.mcnicholas"
+		},
+		"TRG_S_4am_Daily_properties_PL_Control_parameters_PipelineName": {
+			"value": "OH_D365_DataSync"
+		},
+		"TRG_S_4am_Daily_properties_PL_Control_parameters_SequenceList": {
+			"value": "[[L],[R],[C],[T]"
+		},
+		"TRG_S_4am_Daily_properties_PL_Control_parameters_LoadType": {
+			"value": "Daily"
+		},
+		"TRG_S_7am_to_5pm_Incremental_properties_PL_Control_parameters_PipelineName": {
+			"value": "OH_D365_DataSync"
+		},
+		"TRG_S_7am_to_5pm_Incremental_properties_PL_Control_parameters_SequenceList": {
+			"value": "[[C],[T]"
+		},
+		"TRG_S_7am_to_5pm_Incremental_properties_PL_Control_parameters_LoadType": {
+			"value": "Incremental"
+		},
+		"TRG_S_8pm_Incremental_properties_PL_Control_parameters_PipelineName": {
+			"value": "OH_D365_DataSync"
+		},
+		"TRG_S_8pm_Incremental_properties_PL_Control_parameters_SequenceList": {
+			"value": "[[D],[I]"
+		},
+		"TRG_S_8pm_Incremental_properties_PL_Control_parameters_LoadType": {
+			"value": "Incremental"
+		},
+		"BBP-Pro2SQL-01_properties_typeProperties_linkedInfo_resourceId": {
+			"value": "/subscriptions/83e38fc3-11f8-44f0-87d5-048acb1450dc/resourcegroups/PHG-Intergration/providers/Microsoft.DataFactory/factories/phg-eval-datafactory/integrationruntimes/BBP-Pro2SQL-01"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
