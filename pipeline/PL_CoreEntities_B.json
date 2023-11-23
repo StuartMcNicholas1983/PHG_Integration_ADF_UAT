@@ -1562,10 +1562,13 @@
 																		},
 																		{
 																			"source": {
-																				"name": "phg_enddate"
+																				"name": "phg_enddate",
+																				"type": "DateTime",
+																				"physicalType": "DateTime"
 																			},
 																			"sink": {
-																				"name": "phg_enddate"
+																				"name": "phg_enddate",
+																				"type": "DateTime"
 																			}
 																		},
 																		{
