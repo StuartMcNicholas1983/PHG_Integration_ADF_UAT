@@ -616,7 +616,7 @@
 				"type": "SetVariable",
 				"dependsOn": [
 					{
-						"activity": "SequenceGroup - Inactive",
+						"activity": "Load Type",
 						"dependencyConditions": [
 							"Completed"
 						]
@@ -1347,6 +1347,69 @@
 									}
 								}
 							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Load Type",
+				"type": "Switch",
+				"dependsOn": [
+					{
+						"activity": "SequenceGroup - Inactive",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"on": {
+						"value": "@pipeline().parameters.LoadType",
+						"type": "Expression"
+					},
+					"cases": [
+						{
+							"value": "Full",
+							"activities": [
+								{
+									"name": "Wait1",
+									"type": "Wait",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"waitTimeInSeconds": 1
+									}
+								}
+							]
+						},
+						{
+							"value": "Incremental",
+							"activities": [
+								{
+									"name": "Wait2",
+									"type": "Wait",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"waitTimeInSeconds": 1
+									}
+								}
+							]
+						},
+						{
+							"value": "Daily",
+							"activities": [
+								{
+									"name": "Wait3",
+									"type": "Wait",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"waitTimeInSeconds": 1
+									}
+								}
+							]
 						}
 					]
 				}
