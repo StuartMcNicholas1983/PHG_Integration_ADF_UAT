@@ -710,7 +710,7 @@
 						"type": "SetVariable",
 						"dependsOn": [
 							{
-								"activity": "Load Type",
+								"activity": "LoadType2",
 								"dependencyConditions": [
 									"Completed"
 								]
@@ -1449,13 +1449,13 @@
 						}
 					},
 					{
-						"name": "Load Type",
+						"name": "LoadType2",
 						"type": "Switch",
 						"dependsOn": [
 							{
 								"activity": "SequenceGroup - Inactive",
 								"dependencyConditions": [
-									"Completed"
+									"Succeeded"
 								]
 							}
 						],
@@ -1470,40 +1470,26 @@
 									"value": "Full",
 									"activities": [
 										{
-											"name": "Wait4",
-											"type": "Wait",
+											"name": "Full Load Reset - Post",
+											"type": "ExecutePipeline",
 											"dependsOn": [],
 											"userProperties": [],
 											"typeProperties": {
-												"waitTimeInSeconds": 1
-											}
-										}
-									]
-								},
-								{
-									"value": "Incremental",
-									"activities": [
-										{
-											"name": "Wait2",
-											"type": "Wait",
-											"dependsOn": [],
-											"userProperties": [],
-											"typeProperties": {
-												"waitTimeInSeconds": 1
-											}
-										}
-									]
-								},
-								{
-									"value": "Daily",
-									"activities": [
-										{
-											"name": "Wait3",
-											"type": "Wait",
-											"dependsOn": [],
-											"userProperties": [],
-											"typeProperties": {
-												"waitTimeInSeconds": 1
+												"pipeline": {
+													"referenceName": "PL_FullLoadReset_Post",
+													"type": "PipelineReference"
+												},
+												"waitOnCompletion": true,
+												"parameters": {
+													"PipelineName": {
+														"value": "@pipeline().parameters.PipelineName",
+														"type": "Expression"
+													},
+													"LoadType": {
+														"value": "@pipeline().parameters.LoadType",
+														"type": "Expression"
+													}
+												}
 											}
 										}
 									]
@@ -1560,7 +1546,8 @@
 				"[concat(variables('factoryId'), '/pipelines/PL_CoreEntities_C')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_InactiveEntities')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_FullLoadReset')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_DailyReset')]"
+				"[concat(variables('factoryId'), '/pipelines/PL_DailyReset')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_FullLoadReset_Post')]"
 			]
 		},
 		{
