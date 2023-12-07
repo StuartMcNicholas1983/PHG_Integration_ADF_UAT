@@ -15,9 +15,8 @@
 		"annotations": [],
 		"type": "SqlServer",
 		"typeProperties": {
-			"connectionString": "integrated security=True;data source=@{linkedService().ServerName};initial catalog=@{linkedService().DatabaseName}",
-			"userName": "GROUPICT\\stuart.mcnicholas",
-			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIwYjk1ZGMwMS1lNWIyLTQ2OTctYjJjYS03ODQ2MjFlM2JiYjMiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+			"connectionString": "integrated security=False;data source=@{linkedService().ServerName};initial catalog=@{linkedService().DatabaseName};user id=Baytree",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI4MWQxZjNiMi0xNmVkLTQxNjMtOWVhOS1hOGIzNjc2NzQ2MWUiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
 		},
 		"connectVia": {
 			"referenceName": "BBP-Pro2SQL-01",
