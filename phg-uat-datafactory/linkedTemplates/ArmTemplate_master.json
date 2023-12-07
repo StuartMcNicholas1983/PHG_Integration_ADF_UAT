@@ -21,12 +21,7 @@
 		},
 		"SqlServer_OnPrem_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'SqlServer_OnPrem'",
-			"defaultValue": "Integrated Security=True;Data Source=@{linkedService().ServerName};Initial Catalog=@{linkedService().DatabaseName}"
-		},
-		"SqlServer_OnPrem_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'SqlServer_OnPrem'"
+			"metadata": "Secure string for 'connectionString' of 'SqlServer_OnPrem'"
 		},
 		"DataLake_properties_typeProperties_url": {
 			"type": "string",
@@ -35,10 +30,6 @@
 		"Dataverse_properties_typeProperties_servicePrincipalId": {
 			"type": "string",
 			"defaultValue": "1bafd450-9ac7-4646-b5d1-7dd54a8a6502"
-		},
-		"SqlServer_OnPrem_properties_typeProperties_userName": {
-			"type": "string",
-			"defaultValue": "GROUPICT\\stuart.mcnicholas"
 		},
 		"TRG_S_4am_Daily_properties_PL_Control_parameters_PipelineName": {
 			"type": "string",
@@ -119,9 +110,6 @@
 					"SqlServer_OnPrem_connectionString": {
 						"value": "[parameters('SqlServer_OnPrem_connectionString')]"
 					},
-					"SqlServer_OnPrem_password": {
-						"value": "[parameters('SqlServer_OnPrem_password')]"
-					},
 					"DataLake_properties_typeProperties_url": {
 						"value": "[parameters('DataLake_properties_typeProperties_url')]"
 					},
@@ -130,9 +118,6 @@
 					},
 					"BBP-Pro2SQL-01_properties_typeProperties_linkedInfo_resourceId": {
 						"value": "[parameters('BBP-Pro2SQL-01_properties_typeProperties_linkedInfo_resourceId')]"
-					},
-					"SqlServer_OnPrem_properties_typeProperties_userName": {
-						"value": "[parameters('SqlServer_OnPrem_properties_typeProperties_userName')]"
 					}
 				}
 			},

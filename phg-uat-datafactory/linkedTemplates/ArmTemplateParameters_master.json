@@ -15,9 +15,6 @@
 			"value": ""
 		},
 		"SqlServer_OnPrem_connectionString": {
-			"value": "Integrated Security=True;Data Source=@{linkedService().ServerName};Initial Catalog=@{linkedService().DatabaseName}"
-		},
-		"SqlServer_OnPrem_password": {
 			"value": ""
 		},
 		"DataLake_properties_typeProperties_url": {
@@ -25,9 +22,6 @@
 		},
 		"Dataverse_properties_typeProperties_servicePrincipalId": {
 			"value": "1bafd450-9ac7-4646-b5d1-7dd54a8a6502"
-		},
-		"SqlServer_OnPrem_properties_typeProperties_userName": {
-			"value": "GROUPICT\\stuart.mcnicholas"
 		},
 		"TRG_S_4am_Daily_properties_PL_Control_parameters_PipelineName": {
 			"value": "OH_D365_DataSync"
