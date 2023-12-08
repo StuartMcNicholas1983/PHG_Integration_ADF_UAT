@@ -21,7 +21,12 @@
 		},
 		"SqlServer_OnPrem_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'SqlServer_OnPrem'"
+			"metadata": "Secure string for 'connectionString' of 'SqlServer_OnPrem'",
+			"defaultValue": "Integrated Security=True;Data Source=@{linkedService().ServerName};Initial Catalog=@{linkedService().DatabaseName}"
+		},
+		"SqlServer_OnPrem_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'SqlServer_OnPrem'"
 		},
 		"DataLake_properties_typeProperties_url": {
 			"type": "string",
@@ -30,6 +35,10 @@
 		"Dataverse_properties_typeProperties_servicePrincipalId": {
 			"type": "string",
 			"defaultValue": "1bafd450-9ac7-4646-b5d1-7dd54a8a6502"
+		},
+		"SqlServer_OnPrem_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "groupict\\stuart.mcnicholas"
 		},
 		"TRG_S_4am_Daily_properties_PL_Control_parameters_PipelineName": {
 			"type": "string",
@@ -21722,7 +21731,12 @@
 				"annotations": [],
 				"type": "SqlServer",
 				"typeProperties": {
-					"connectionString": "[parameters('SqlServer_OnPrem_connectionString')]"
+					"connectionString": "[parameters('SqlServer_OnPrem_connectionString')]",
+					"userName": "[parameters('SqlServer_OnPrem_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('SqlServer_OnPrem_password')]"
+					}
 				},
 				"connectVia": {
 					"referenceName": "BBP-Pro2SQL-01",
@@ -21741,7 +21755,7 @@
 				"annotations": [
 					"Sequence List: [R],[L],[C],[T]"
 				],
-				"runtimeState": "Stopped",
+				"runtimeState": "Started",
 				"pipelines": [
 					{
 						"pipelineReference": {
@@ -21785,7 +21799,7 @@
 				"annotations": [
 					"Sequence List: [C],[T]"
 				],
-				"runtimeState": "Stopped",
+				"runtimeState": "Started",
 				"pipelines": [
 					{
 						"pipelineReference": {
@@ -21839,7 +21853,7 @@
 				"annotations": [
 					"Sequence List: [D],[I]"
 				],
-				"runtimeState": "Stopped",
+				"runtimeState": "Started",
 				"pipelines": [
 					{
 						"pipelineReference": {

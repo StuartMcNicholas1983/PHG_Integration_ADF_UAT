@@ -21,7 +21,12 @@
 		},
 		"SqlServer_OnPrem_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'SqlServer_OnPrem'"
+			"metadata": "Secure string for 'connectionString' of 'SqlServer_OnPrem'",
+			"defaultValue": "Integrated Security=True;Data Source=@{linkedService().ServerName};Initial Catalog=@{linkedService().DatabaseName}"
+		},
+		"SqlServer_OnPrem_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'SqlServer_OnPrem'"
 		},
 		"DataLake_properties_typeProperties_url": {
 			"type": "string",
@@ -34,6 +39,10 @@
 		"BBP-Pro2SQL-01_properties_typeProperties_linkedInfo_resourceId": {
 			"type": "string",
 			"defaultValue": "/subscriptions/83e38fc3-11f8-44f0-87d5-048acb1450dc/resourcegroups/PHG-Intergration/providers/Microsoft.DataFactory/factories/phg-eval-datafactory/integrationruntimes/BBP-Pro2SQL-01"
+		},
+		"SqlServer_OnPrem_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "groupict\\stuart.mcnicholas"
 		}
 	},
 	"variables": {
@@ -648,7 +657,12 @@
 				"annotations": [],
 				"type": "SqlServer",
 				"typeProperties": {
-					"connectionString": "[parameters('SqlServer_OnPrem_connectionString')]"
+					"connectionString": "[parameters('SqlServer_OnPrem_connectionString')]",
+					"userName": "[parameters('SqlServer_OnPrem_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('SqlServer_OnPrem_password')]"
+					}
 				},
 				"connectVia": {
 					"referenceName": "BBP-Pro2SQL-01",
