@@ -1139,6 +1139,17 @@
 																				"name": "phg_placetype",
 																				"type": "String"
 																			}
+																		},
+																		{
+																			"source": {
+																				"name": "phg_tenancyid",
+																				"type": "Guid",
+																				"physicalType": "Guid"
+																			},
+																			"sink": {
+																				"name": "phg_tenancyid",
+																				"type": "Guid"
+																			}
 																		}
 																	],
 																	"typeConversion": true,
@@ -1613,6 +1624,17 @@
 																			"sink": {
 																				"name": "phg_checksum",
 																				"type": "String"
+																			}
+																		},
+																		{
+																			"source": {
+																				"name": "phg_propertyid",
+																				"type": "Guid",
+																				"physicalType": "Guid"
+																			},
+																			"sink": {
+																				"name": "phg_propertyid",
+																				"type": "Guid"
 																			}
 																		}
 																	],
