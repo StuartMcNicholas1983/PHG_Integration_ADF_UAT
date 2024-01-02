@@ -211,7 +211,14 @@
 									{
 										"name": "PipelineParameters LogEnd",
 										"type": "SqlServerStoredProcedure",
-										"dependsOn": [],
+										"dependsOn": [
+											{
+												"activity": "Script - Entity RowCount",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
 										"policy": {
 											"timeout": "0.12:00:00",
 											"retry": 0,
@@ -254,12 +261,66 @@
 														"type": "Expression"
 													},
 													"type": "String"
+												},
+												"intDestEntityRowCount": {
+													"value": {
+														"value": "@activity('Script - Entity RowCount').output.outputParameters.RowCount",
+														"type": "Expression"
+													},
+													"type": "Int32"
 												}
 											}
 										},
 										"linkedServiceName": {
 											"referenceName": "Control",
 											"type": "LinkedServiceReference"
+										}
+									},
+									{
+										"name": "Script - Entity RowCount",
+										"type": "Script",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"linkedServiceName": {
+											"referenceName": "SqlServer_OnPrem",
+											"type": "LinkedServiceReference",
+											"parameters": {
+												"ServerName": {
+													"value": "@item().srcServer",
+													"type": "Expression"
+												},
+												"DatabaseName": {
+													"value": "@item().srcDatabase",
+													"type": "Expression"
+												}
+											}
+										},
+										"typeProperties": {
+											"scripts": [
+												{
+													"parameters": [
+														{
+															"name": "RowCount",
+															"type": "Int32",
+															"value": null,
+															"direction": "Output"
+														}
+													],
+													"type": "Query",
+													"text": {
+														"value": "@concat('select @RowCount = count(*) from d365.', item().DestEntity)",
+														"type": "Expression"
+													}
+												}
+											],
+											"scriptBlockExecutionTimeout": "02:00:00"
 										}
 									}
 								],
@@ -629,6 +690,10 @@
 																			"type": "Expression"
 																		},
 																		"type": "String"
+																	},
+																	"intDestEntityRowCount": {
+																		"value": null,
+																		"type": "Int32"
 																	}
 																}
 															},
@@ -1032,6 +1097,10 @@
 																			"type": "Expression"
 																		},
 																		"type": "String"
+																	},
+																	"intDestEntityRowCount": {
+																		"value": null,
+																		"type": "Int32"
 																	}
 																}
 															},
