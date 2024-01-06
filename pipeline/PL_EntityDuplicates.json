@@ -225,7 +225,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"dataset": {
-									"referenceName": "DS_Datalake_PipeDelimited1",
+									"referenceName": "DS_Datalake_PipeDelimited",
 									"type": "DatasetReference",
 									"parameters": {
 										"Container": {
