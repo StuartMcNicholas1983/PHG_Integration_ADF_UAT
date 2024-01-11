@@ -326,82 +326,6 @@
 								],
 								"ifTrueActivities": [
 									{
-										"name": "Destination to Config",
-										"type": "Copy",
-										"dependsOn": [
-											{
-												"activity": "Switch Entity",
-												"dependencyConditions": [
-													"Succeeded"
-												]
-											}
-										],
-										"policy": {
-											"timeout": "0.12:00:00",
-											"retry": 0,
-											"retryIntervalInSeconds": 30,
-											"secureOutput": false,
-											"secureInput": false
-										},
-										"userProperties": [],
-										"typeProperties": {
-											"source": {
-												"type": "CommonDataServiceForAppsSource",
-												"query": {
-													"value": "@item().FetchXML",
-													"type": "Expression"
-												}
-											},
-											"sink": {
-												"type": "SqlServerSink",
-												"writeBehavior": "upsert",
-												"upsertSettings": {
-													"useTempDB": true,
-													"keys": [
-														"phg_integrationkey"
-													]
-												},
-												"sqlWriterUseTableLock": false,
-												"tableOption": "autoCreate"
-											},
-											"enableStaging": false,
-											"enableSkipIncompatibleRow": false
-										},
-										"inputs": [
-											{
-												"referenceName": "DS_Dataverse",
-												"type": "DatasetReference",
-												"parameters": {
-													"EntityName": {
-														"value": "@item().DestEntity",
-														"type": "Expression"
-													}
-												}
-											}
-										],
-										"outputs": [
-											{
-												"referenceName": "DS_SQL_OnPrem_Tbl",
-												"type": "DatasetReference",
-												"parameters": {
-													"ServerName": {
-														"value": "@item().SrcServer",
-														"type": "Expression"
-													},
-													"DatabaseName": {
-														"value": "@item().SrcDatabase",
-														"type": "Expression"
-													},
-													"SchemaName": "d365",
-													"TableName": {
-														"value": "@item().DestEntity",
-														"type": "Expression"
-													}
-												}
-											}
-										]
-									},
-									{
 										"name": "Switch Entity",
 										"type": "Switch",
 										"dependsOn": [
@@ -1119,7 +1043,7 @@
 										"type": "Copy",
 										"dependsOn": [
 											{
-												"activity": "Destination to Config",
+												"activity": "Switch Entity",
 												"dependencyConditions": [
 													"Completed"
 												]
