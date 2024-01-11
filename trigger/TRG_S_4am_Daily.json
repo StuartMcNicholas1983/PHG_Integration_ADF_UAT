@@ -4,7 +4,7 @@
 		"annotations": [
 			"Sequence List: [R],[L],[C],[T]"
 		],
-		"runtimeState": "Started",
+		"runtimeState": "Stopped",
 		"pipelines": [
 			{
 				"pipelineReference": {
