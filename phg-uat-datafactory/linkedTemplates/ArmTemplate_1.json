@@ -5969,7 +5969,7 @@
 						"typeProperties": {
 							"source": {
 								"type": "AzureSqlSource",
-								"sqlReaderQuery": "select\t pp.Pipeline\n\t\t,pp.SrcSystem\n\t\t,pp.EntityType\n\t\t,pp.SrcServer\n\t\t,pp.SrcDatabase\n\t\t,pp.DestSchema\n\t\t,pp.DestEntity\n\t\t,pp.Entity\n\t\t,pp.UpsertKeyColumn\n\t\t,cast(replace(cast(pp.FetchXML as nvarchar(max)),'operator=\"today\"','operator=\"not-null\"') as xml) as FetchXML\n\t\t,pp.IsActive\nfrom\tdbo.PipelineParameters pp\nwhere\tisActive = 1\nand\t\tpp.EntityType in ('Reference', 'Core_A','Core_B','Core_C', 'Transactional')",
+								"sqlReaderQuery": "select\t pp.Pipeline\n\t\t,pp.SrcSystem\n\t\t,pp.EntityType\n\t\t,pp.SrcServer\n\t\t,pp.SrcDatabase\n\t\t,pp.DestSchema\n\t\t,pp.DestEntity\n\t\t,pp.Entity\n\t\t,pp.UpsertKeyColumn\n\t\t,cast(replace(cast(pp.FetchXML as nvarchar(max)),'operator=\"last-x-hours\" value=\"1\"','operator=\"not-null\"') as xml) as FetchXML\n\t\t,pp.IsActive\nfrom\tdbo.PipelineParameters pp\nwhere\tisActive = 1\nand\t\tpp.EntityType in ('Reference', 'Core_A','Core_B','Core_C', 'Transactional')\n\n\n",
 								"queryTimeout": "02:00:00",
 								"partitionOption": "None"
 							},
