@@ -827,149 +827,6 @@
 																	}
 																}
 															]
-														},
-														{
-															"name": "Destination to Config",
-															"type": "Copy",
-															"dependsOn": [
-																{
-																	"activity": "PipelineParameters LogEnd - Account",
-																	"dependencyConditions": [
-																		"Completed"
-																	]
-																},
-																{
-																	"activity": "PipelineAuditDetailLog_2 Account",
-																	"dependencyConditions": [
-																		"Completed"
-																	]
-																}
-															],
-															"policy": {
-																"timeout": "0.12:00:00",
-																"retry": 0,
-																"retryIntervalInSeconds": 30,
-																"secureOutput": false,
-																"secureInput": false
-															},
-															"userProperties": [],
-															"typeProperties": {
-																"source": {
-																	"type": "CommonDataServiceForAppsSource",
-																	"query": {
-																		"value": "@item().FetchXML",
-																		"type": "Expression"
-																	}
-																},
-																"sink": {
-																	"type": "SqlServerSink",
-																	"writeBehavior": "upsert",
-																	"upsertSettings": {
-																		"useTempDB": true,
-																		"keys": [
-																			"phg_integrationkey"
-																		]
-																	},
-																	"sqlWriterUseTableLock": false,
-																	"tableOption": "autoCreate"
-																},
-																"enableStaging": false,
-																"enableSkipIncompatibleRow": false
-															},
-															"inputs": [
-																{
-																	"referenceName": "DS_Dataverse",
-																	"type": "DatasetReference",
-																	"parameters": {
-																		"EntityName": {
-																			"value": "@item().DestEntity",
-																			"type": "Expression"
-																		}
-																	}
-																}
-															],
-															"outputs": [
-																{
-																	"referenceName": "DS_SQL_OnPrem_Tbl",
-																	"type": "DatasetReference",
-																	"parameters": {
-																		"ServerName": {
-																			"value": "@item().SrcServer",
-																			"type": "Expression"
-																		},
-																		"DatabaseName": {
-																			"value": "@item().SrcDatabase",
-																			"type": "Expression"
-																		},
-																		"SchemaName": "d365",
-																		"TableName": {
-																			"value": "@item().DestEntity",
-																			"type": "Expression"
-																		}
-																	}
-																}
-															]
-														},
-														{
-															"name": "PipelineAuditDetailLog_3",
-															"type": "Copy",
-															"dependsOn": [
-																{
-																	"activity": "Destination to Config",
-																	"dependencyConditions": [
-																		"Succeeded"
-																	]
-																}
-															],
-															"policy": {
-																"timeout": "0.12:00:00",
-																"retry": 0,
-																"retryIntervalInSeconds": 30,
-																"secureOutput": false,
-																"secureInput": false
-															},
-															"userProperties": [],
-															"typeProperties": {
-																"source": {
-																	"type": "AzureSqlSource",
-																	"sqlReaderQuery": {
-																		"value": "SELECT \n\n'@{pipeline().DataFactory}' as DataFactoryName,\n'@{pipeline().Pipeline}' as PipelineName,\n'@{pipeline().RunId}' as RunID,\n\n'@{item().SrcSystem}' as SrcSystem,\n'@{item().SrcStoredProcedure}' as Source,\n'@{item().DestEntity}' as Destination,\n'Destination to Config' as CopyActivity,\n\n'@{pipeline().TriggerType}' as TriggerType,\n'@{pipeline().TriggerId}' as TriggerID,\n'@{pipeline().TriggerName}' as TriggerName,\n'@{pipeline().TriggerTime}' as TriggerTime,\n\n'@{activity('Destination to Config').output.rowsCopied}' as RowsCopied,\n'@{activity('Destination to Config').output.rowsRead}' as RowsRead,\n0 as RowsSkipped,\n'@{activity('Destination to Config').output.usedParallelCopies}' as ParallelCopies,\n'@{activity('Destination to Config').output.copyDuration}' as CopyDuration_SS,\n'@{activity('Destination to Config').output.effectiveIntegrationRuntime}' as EffectiveIntegrationRuntime,\n\n'@{activity('Destination to Config').output.executionDetails[0].source.type}' as SourceType,\n'@{activity('Destination to Config').output.executionDetails[0].sink.type}' as SinkType,\n'@{activity('Destination to Config').output.executionDetails[0].status}' as ExecutionStatus,\n'@{activity('Destination to Config').output.executionDetails[0].start}' as CopyActivity_StartTime,\n'@{utcnow()}' as CopyActivity_EndTime,\n'@{activity('Destination to Config').output.executionDetails[0].detailedDurations.queuingDuration}' as CopyActivity_QueuingDuration_SS,\n'@{activity('Destination to Config').output.executionDetails[0].detailedDurations.queuingDuration}' as CopyActivity_TimeToFirstByte_SS,\n'@{activity('Destination to Config').output.executionDetails[0].detailedDurations.transferDuration}' as CopyActivity_TransferDuration_SS,\n3 as CopyActivity_Stage,\n'@{pipeline().parameters.SequenceGroup}' as SequenceGroup\n",
-																		"type": "Expression"
-																	},
-																	"queryTimeout": "02:00:00",
-																	"partitionOption": "None"
-																},
-																"sink": {
-																	"type": "AzureSqlSink",
-																	"writeBehavior": "insert",
-																	"sqlWriterUseTableLock": false
-																},
-																"enableStaging": false,
-																"translator": {
-																	"type": "TabularTranslator",
-																	"typeConversion": true,
-																	"typeConversionSettings": {
-																		"allowDataTruncation": true,
-																		"treatBooleanAsNumber": false
-																	}
-																}
-															},
-															"inputs": [
-																{
-																	"referenceName": "DS_SQL_Control",
-																	"type": "DatasetReference"
-																}
-															],
-															"outputs": [
-																{
-																	"referenceName": "DS_SQL_Control_Tbl",
-																	"type": "DatasetReference",
-																	"parameters": {
-																		"SchemaName": "dbo",
-																		"TableName": "PipelineAuditDetailLog"
-																	}
-																}
-															]
 														}
 													]
 												}
@@ -1085,6 +942,143 @@
 												"type": "AzureSqlSource",
 												"sqlReaderQuery": {
 													"value": "SELECT \n\n'@{pipeline().DataFactory}' as DataFactoryName,\n'@{pipeline().Pipeline}' as PipelineName,\n'@{pipeline().RunId}' as RunID,\n\n'@{item().SrcSystem}' as SrcSystem,\n'@{item().SrcStoredProcedure}' as Source,\n'@{item().DestEntity}' as Destination,\n'Staging to Transformed' as CopyActivity,\n\n'@{pipeline().TriggerType}' as TriggerType,\n'@{pipeline().TriggerId}' as TriggerID,\n'@{pipeline().TriggerName}' as TriggerName,\n'@{pipeline().TriggerTime}' as TriggerTime,\n\n'@{activity('Staging to Transformed').output.rowsCopied}' as RowsCopied,\n'@{activity('Staging to Transformed').output.rowsRead}' as RowsRead,\n'@{activity('Staging to Transformed').output.rowsSkipped}' as RowsSkipped,\n'@{activity('Staging to Transformed').output.usedParallelCopies}' as ParallelCopies,\n'@{activity('Staging to Transformed').output.copyDuration}' as CopyDuration_SS,\n'@{activity('Staging to Transformed').output.effectiveIntegrationRuntime}' as EffectiveIntegrationRuntime,\n\n'@{activity('Staging to Transformed').output.executionDetails[0].source.type}' as SourceType,\n'@{activity('Staging to Transformed').output.executionDetails[0].sink.type}' as SinkType,\n'@{activity('Staging to Transformed').output.executionDetails[0].status}' as ExecutionStatus,\n'@{activity('Staging to Transformed').output.executionDetails[0].start}' as CopyActivity_StartTime,\n'@{utcnow()}' as CopyActivity_EndTime,\n'@{activity('Staging to Transformed').output.executionDetails[0].detailedDurations.queuingDuration}' as CopyActivity_QueuingDuration_SS,\n'@{activity('Staging to Transformed').output.executionDetails[0].detailedDurations.queuingDuration}' as CopyActivity_TimeToFirstByte_SS,\n'@{activity('Staging to Transformed').output.executionDetails[0].detailedDurations.transferDuration}' as CopyActivity_TransferDuration_SS,\n1 as CopyActivity_Stage,\n'@{pipeline().parameters.SequenceGroup}' as SequenceGroup\n\n",
+													"type": "Expression"
+												},
+												"queryTimeout": "02:00:00",
+												"partitionOption": "None"
+											},
+											"sink": {
+												"type": "AzureSqlSink",
+												"writeBehavior": "insert",
+												"sqlWriterUseTableLock": false
+											},
+											"enableStaging": false,
+											"translator": {
+												"type": "TabularTranslator",
+												"typeConversion": true,
+												"typeConversionSettings": {
+													"allowDataTruncation": true,
+													"treatBooleanAsNumber": false
+												}
+											}
+										},
+										"inputs": [
+											{
+												"referenceName": "DS_SQL_Control",
+												"type": "DatasetReference"
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "DS_SQL_Control_Tbl",
+												"type": "DatasetReference",
+												"parameters": {
+													"SchemaName": "dbo",
+													"TableName": "PipelineAuditDetailLog"
+												}
+											}
+										]
+									},
+									{
+										"name": "Destination to Config",
+										"type": "Copy",
+										"dependsOn": [
+											{
+												"activity": "Switch Entity",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "CommonDataServiceForAppsSource",
+												"query": {
+													"value": "@item().FetchXML",
+													"type": "Expression"
+												}
+											},
+											"sink": {
+												"type": "SqlServerSink",
+												"writeBehavior": "upsert",
+												"upsertSettings": {
+													"useTempDB": true,
+													"keys": [
+														"phg_integrationkey"
+													]
+												},
+												"sqlWriterUseTableLock": false,
+												"tableOption": "autoCreate"
+											},
+											"enableStaging": false,
+											"enableSkipIncompatibleRow": false
+										},
+										"inputs": [
+											{
+												"referenceName": "DS_Dataverse",
+												"type": "DatasetReference",
+												"parameters": {
+													"EntityName": {
+														"value": "@item().DestEntity",
+														"type": "Expression"
+													}
+												}
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "DS_SQL_OnPrem_Tbl",
+												"type": "DatasetReference",
+												"parameters": {
+													"ServerName": {
+														"value": "@item().SrcServer",
+														"type": "Expression"
+													},
+													"DatabaseName": {
+														"value": "@item().SrcDatabase",
+														"type": "Expression"
+													},
+													"SchemaName": "d365",
+													"TableName": {
+														"value": "@item().DestEntity",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									},
+									{
+										"name": "PipelineAuditDetailLog_3",
+										"type": "Copy",
+										"dependsOn": [
+											{
+												"activity": "Destination to Config",
+												"dependencyConditions": [
+													"Completed"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "AzureSqlSource",
+												"sqlReaderQuery": {
+													"value": "SELECT \n\n'@{pipeline().DataFactory}' as DataFactoryName,\n'@{pipeline().Pipeline}' as PipelineName,\n'@{pipeline().RunId}' as RunID,\n\n'@{item().SrcSystem}' as SrcSystem,\n'@{item().SrcStoredProcedure}' as Source,\n'@{item().DestEntity}' as Destination,\n'Destination to Config' as CopyActivity,\n\n'@{pipeline().TriggerType}' as TriggerType,\n'@{pipeline().TriggerId}' as TriggerID,\n'@{pipeline().TriggerName}' as TriggerName,\n'@{pipeline().TriggerTime}' as TriggerTime,\n\n'@{activity('Destination to Config').output.rowsCopied}' as RowsCopied,\n'@{activity('Destination to Config').output.rowsRead}' as RowsRead,\n0 as RowsSkipped,\n'@{activity('Destination to Config').output.usedParallelCopies}' as ParallelCopies,\n'@{activity('Destination to Config').output.copyDuration}' as CopyDuration_SS,\n'@{activity('Destination to Config').output.effectiveIntegrationRuntime}' as EffectiveIntegrationRuntime,\n\n'@{activity('Destination to Config').output.executionDetails[0].source.type}' as SourceType,\n'@{activity('Destination to Config').output.executionDetails[0].sink.type}' as SinkType,\n'@{activity('Destination to Config').output.executionDetails[0].status}' as ExecutionStatus,\n'@{activity('Destination to Config').output.executionDetails[0].start}' as CopyActivity_StartTime,\n'@{utcnow()}' as CopyActivity_EndTime,\n'@{activity('Destination to Config').output.executionDetails[0].detailedDurations.queuingDuration}' as CopyActivity_QueuingDuration_SS,\n'@{activity('Destination to Config').output.executionDetails[0].detailedDurations.queuingDuration}' as CopyActivity_TimeToFirstByte_SS,\n'@{activity('Destination to Config').output.executionDetails[0].detailedDurations.transferDuration}' as CopyActivity_TransferDuration_SS,\n3 as CopyActivity_Stage,\n'@{pipeline().parameters.SequenceGroup}' as SequenceGroup\n",
 													"type": "Expression"
 												},
 												"queryTimeout": "02:00:00",
