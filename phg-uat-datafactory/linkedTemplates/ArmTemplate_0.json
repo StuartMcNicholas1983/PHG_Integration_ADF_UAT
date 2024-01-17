@@ -34,7 +34,7 @@
 		},
 		"Dataverse_properties_typeProperties_servicePrincipalId": {
 			"type": "string",
-			"defaultValue": "1bafd450-9ac7-4646-b5d1-7dd54a8a6502"
+			"defaultValue": "143b4812-f858-4366-8d81-b02b63ff26ca"
 		},
 		"BBP-Pro2SQL-01_properties_typeProperties_linkedInfo_resourceId": {
 			"type": "string",
