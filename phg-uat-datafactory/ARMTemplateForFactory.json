@@ -313,44 +313,6 @@
 											}
 										}
 									}
-								},
-								{
-									"name": "Core A - AuditLog",
-									"description": "exec [spInsert_Core_A_AuditLog]",
-									"type": "SqlServerStoredProcedure",
-									"dependsOn": [
-										{
-											"activity": "Core Entities_A",
-											"dependencyConditions": [
-												"Completed"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"storedProcedureName": "[[adf].[spInsert_Core_A_AuditLog]"
-									},
-									"linkedServiceName": {
-										"referenceName": "SqlServer_OnPrem",
-										"type": "LinkedServiceReference",
-										"parameters": {
-											"ServerName": {
-												"value": "@item().SrcServer",
-												"type": "Expression"
-											},
-											"DatabaseName": {
-												"value": "@item().SrcDatabase",
-												"type": "Expression"
-											}
-										}
-									}
 								}
 							]
 						}
@@ -868,44 +830,6 @@
 											}
 										}
 									}
-								},
-								{
-									"name": "Core B - AuditLog",
-									"description": "exec [spInsert_Core_B_AuditLog]",
-									"type": "SqlServerStoredProcedure",
-									"dependsOn": [
-										{
-											"activity": "Core_B Entities",
-											"dependencyConditions": [
-												"Completed"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"storedProcedureName": "[[adf].[spInsert_Core_B_AuditLog]"
-									},
-									"linkedServiceName": {
-										"referenceName": "SqlServer_OnPrem",
-										"type": "LinkedServiceReference",
-										"parameters": {
-											"ServerName": {
-												"value": "@item().SrcServer",
-												"type": "Expression"
-											},
-											"DatabaseName": {
-												"value": "@item().SrcDatabase",
-												"type": "Expression"
-											}
-										}
-									}
 								}
 							]
 						}
@@ -1015,44 +939,6 @@
 											},
 											"LoadType": {
 												"value": "@pipeline().parameters.LoadType",
-												"type": "Expression"
-											}
-										}
-									}
-								},
-								{
-									"name": "Core C - AuditLog",
-									"description": "exec [spInsert_Core_C_AuditLog]",
-									"type": "SqlServerStoredProcedure",
-									"dependsOn": [
-										{
-											"activity": "Core_C Entities",
-											"dependencyConditions": [
-												"Completed"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"storedProcedureName": "[[adf].[spInsert_Core_C_AuditLog]"
-									},
-									"linkedServiceName": {
-										"referenceName": "SqlServer_OnPrem",
-										"type": "LinkedServiceReference",
-										"parameters": {
-											"ServerName": {
-												"value": "@item().SrcServer",
-												"type": "Expression"
-											},
-											"DatabaseName": {
-												"value": "@item().SrcDatabase",
 												"type": "Expression"
 											}
 										}
@@ -1546,7 +1432,6 @@
 				"[concat(variables('factoryId'), '/linkedServices/Control')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_ReferenceEntities')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_CoreEntities_A')]",
-				"[concat(variables('factoryId'), '/linkedServices/SqlServer_OnPrem')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_LookupEntities')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_DeleteEntities')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_TransactionalEntities')]",
@@ -2681,6 +2566,60 @@
 														}
 													}
 												]
+											},
+											{
+												"name": "AuditLog",
+												"description": "exec [spInsert_Core_A_AuditLog]",
+												"type": "SqlServerStoredProcedure",
+												"dependsOn": [
+													{
+														"activity": "Switch Entity",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"storedProcedureName": "[[adf].[spInsert_AuditLog]",
+													"storedProcedureParameters": {
+														"strEntity": {
+															"value": {
+																"value": "@item().Entity",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strEntityType": {
+															"value": {
+																"value": "@item().EntityType",
+																"type": "Expression"
+															},
+															"type": "String"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "SqlServer_OnPrem",
+													"type": "LinkedServiceReference",
+													"parameters": {
+														"ServerName": {
+															"value": "@item().SrcServer",
+															"type": "Expression"
+														},
+														"DatabaseName": {
+															"value": "@item().SrcDatabase",
+															"type": "Expression"
+														}
+													}
+												}
 											}
 										]
 									}
@@ -5919,6 +5858,60 @@
 														}
 													}
 												]
+											},
+											{
+												"name": "AuditLog",
+												"description": "exec [spInsert_Core_A_AuditLog]",
+												"type": "SqlServerStoredProcedure",
+												"dependsOn": [
+													{
+														"activity": "Switch Entity",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"storedProcedureName": "[[adf].[spInsert_AuditLog]",
+													"storedProcedureParameters": {
+														"strEntity": {
+															"value": {
+																"value": "@item().Entity",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strEntityType": {
+															"value": {
+																"value": "@item().EntityType",
+																"type": "Expression"
+															},
+															"type": "String"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "SqlServer_OnPrem",
+													"type": "LinkedServiceReference",
+													"parameters": {
+														"ServerName": {
+															"value": "@item().SrcServer",
+															"type": "Expression"
+														},
+														"DatabaseName": {
+															"value": "@item().SrcDatabase",
+															"type": "Expression"
+														}
+													}
+												}
 											}
 										]
 									}
@@ -9302,6 +9295,60 @@
 														}
 													}
 												]
+											},
+											{
+												"name": "AuditLog",
+												"description": "exec [spInsert_Core_A_AuditLog]",
+												"type": "SqlServerStoredProcedure",
+												"dependsOn": [
+													{
+														"activity": "Switch Entity",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"storedProcedureName": "[[adf].[spInsert_AuditLog]",
+													"storedProcedureParameters": {
+														"strEntity": {
+															"value": {
+																"value": "@item().Entity",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strEntityType": {
+															"value": {
+																"value": "@item().EntityType",
+																"type": "Expression"
+															},
+															"type": "String"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "SqlServer_OnPrem",
+													"type": "LinkedServiceReference",
+													"parameters": {
+														"ServerName": {
+															"value": "@item().SrcServer",
+															"type": "Expression"
+														},
+														"DatabaseName": {
+															"value": "@item().SrcDatabase",
+															"type": "Expression"
+														}
+													}
+												}
 											}
 										]
 									}
