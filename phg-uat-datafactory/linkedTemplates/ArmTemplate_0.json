@@ -2401,7 +2401,7 @@
 												"type": "SqlServerStoredProcedure",
 												"dependsOn": [
 													{
-														"activity": "Switch Entity",
+														"activity": "Destination to Config",
 														"dependencyConditions": [
 															"Succeeded"
 														]
@@ -5693,7 +5693,7 @@
 												"type": "SqlServerStoredProcedure",
 												"dependsOn": [
 													{
-														"activity": "Switch Entity",
+														"activity": "Destination to Config",
 														"dependencyConditions": [
 															"Succeeded"
 														]
@@ -9130,7 +9130,7 @@
 												"type": "SqlServerStoredProcedure",
 												"dependsOn": [
 													{
-														"activity": "Switch Entity",
+														"activity": "Destination to Config",
 														"dependencyConditions": [
 															"Succeeded"
 														]
