@@ -547,7 +547,7 @@
 															}
 														},
 														{
-															"name": "PipelineAuditDetailLog_2 Transaction",
+															"name": "PipelineAuditDetailLog_2 - Transaction",
 															"type": "SqlServerStoredProcedure",
 															"dependsOn": [
 																{
@@ -945,7 +945,7 @@
 															}
 														},
 														{
-															"name": "PipelineAuditDetailLog_2 DiaryNote",
+															"name": "PipelineAuditDetailLog_2 - DiaryNote",
 															"type": "SqlServerStoredProcedure",
 															"dependsOn": [
 																{
