@@ -386,7 +386,7 @@
 																	"enableCopyActivityLog": true,
 																	"copyActivityLogSettings": {
 																		"logLevel": "Warning",
-																		"enableReliableLogging": false
+																		"enableReliableLogging": true
 																	},
 																	"logLocationSettings": {
 																		"linkedServiceName": {
@@ -1834,6 +1834,19 @@
 								},
 								"enableStaging": false,
 								"enableSkipIncompatibleRow": true,
+								"logSettings": {
+									"enableCopyActivityLog": true,
+									"copyActivityLogSettings": {
+										"logLevel": "Warning",
+										"enableReliableLogging": true
+									},
+									"logLocationSettings": {
+										"linkedServiceName": {
+											"referenceName": "DataLake",
+											"type": "LinkedServiceReference"
+										}
+									}
+								},
 								"translator": {
 									"type": "TabularTranslator",
 									"typeConversion": true,
