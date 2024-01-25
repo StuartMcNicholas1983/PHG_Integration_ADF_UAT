@@ -1844,6 +1844,10 @@
 										"linkedServiceName": {
 											"referenceName": "DataLake",
 											"type": "LinkedServiceReference"
+										},
+										"path": {
+											"value": "@concat('data-sync/OH_D365_DataSync/Logs/',item().SrcSystem,'/Transactional')",
+											"type": "Expression"
 										}
 									}
 								},
