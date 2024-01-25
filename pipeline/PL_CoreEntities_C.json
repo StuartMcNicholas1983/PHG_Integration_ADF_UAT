@@ -3640,7 +3640,7 @@
 									},
 									{
 										"name": "AuditLog",
-										"description": "exec [spInsert_Core_A_AuditLog]",
+										"description": "exec [spInsert_AuditLog]",
 										"type": "SqlServerStoredProcedure",
 										"dependsOn": [
 											{
