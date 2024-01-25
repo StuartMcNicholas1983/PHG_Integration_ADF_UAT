@@ -101,21 +101,6 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/BBP-Pro2SQL-01')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "SelfHosted",
-				"typeProperties": {
-					"linkedInfo": {
-						"resourceId": "[parameters('BBP-Pro2SQL-01_properties_typeProperties_linkedInfo_resourceId')]",
-						"authorizationType": "Rbac"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/AIR-TTL')]",
 			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
 			"apiVersion": "2018-06-01",
@@ -131,6 +116,21 @@
 							"cleanup": false,
 							"customProperties": []
 						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/BBP-Pro2SQL-01')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {
+					"linkedInfo": {
+						"resourceId": "[parameters('BBP-Pro2SQL-01_properties_typeProperties_linkedInfo_resourceId')]",
+						"authorizationType": "Rbac"
 					}
 				}
 			},
@@ -692,6 +692,433 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/integrationRuntimes/BBP-Pro2SQL-01')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_DailyLoad_Post')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "RunStart",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "RunStart",
+							"value": {
+								"value": "@string(utcNow())",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "RunEnd",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "SourceSystem",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "RunEnd",
+							"value": {
+								"value": "@string(utcNow())",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Duration_SS",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "RunEnd",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "Duration_SS",
+							"value": {
+								"value": "@string(div(sub(ticks(formatDateTime(variables('RunEnd'))),ticks(formatDateTime(variables('RunStart')))),10000000))",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "PipelineAuditLog - End - Success",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "Duration_SS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[spUpdate_PipelineAuditLog_End]",
+							"storedProcedureParameters": {
+								"dtRunEnd": {
+									"value": {
+										"value": "@variables('RunEnd')",
+										"type": "Expression"
+									},
+									"type": "DateTime"
+								},
+								"intDuration_SS": {
+									"value": {
+										"value": "@variables('Duration_SS')",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"strStatus": {
+									"value": "Succeeded",
+									"type": "String"
+								},
+								"uniqRunID": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "Guid"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "Control",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "PipelineAuditLog - End - Failed",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "SourceSystem",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[spUpdate_PipelineAuditLog_End]",
+							"storedProcedureParameters": {
+								"dtRunEnd": {
+									"value": {
+										"value": "@utcnow()",
+										"type": "Expression"
+									},
+									"type": "DateTime"
+								},
+								"intDuration_SS": {
+									"value": "0",
+									"type": "Int32"
+								},
+								"strStatus": {
+									"value": "Failed",
+									"type": "String"
+								},
+								"uniqRunID": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "Guid"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "Control",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "SourceSystems",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "PipelineAuditLog - Start",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[dbo].[spGet_PipelineParameters_SourceSystems]",
+								"storedProcedureParameters": {
+									"pipeline": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.PipelineName",
+											"type": "Expression"
+										}
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_SQL_Control",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "SourceSystem",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "SourceSystems",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('SourceSystems').output.value\n",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Post Daily Load - Checksum",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[d365].[spUpdate_PostDailyLoad_Checksum]"
+									},
+									"linkedServiceName": {
+										"referenceName": "SqlServer_OnPrem",
+										"type": "LinkedServiceReference",
+										"parameters": {
+											"ServerName": {
+												"value": "@item().SrcServer",
+												"type": "Expression"
+											},
+											"DatabaseName": {
+												"value": "@item().SrcDatabase",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "PipelineAuditLog - Start",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "RunStart",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[spInsert_PipelineAuditLog_Start]",
+							"storedProcedureParameters": {
+								"dtRunStart": {
+									"value": {
+										"value": "@variables('RunStart')",
+										"type": "Expression"
+									},
+									"type": "DateTime"
+								},
+								"dtTriggerTime": {
+									"value": {
+										"value": "@{pipeline().TriggerTime}",
+										"type": "Expression"
+									},
+									"type": "DateTime"
+								},
+								"strDataFactory": {
+									"value": {
+										"value": "@{pipeline().DataFactory}",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"strPipeline": {
+									"value": {
+										"value": "@{pipeline().Pipeline}",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"strStatus": {
+									"value": "In Progress",
+									"type": "String"
+								},
+								"strTriggeredByPipelineName": {
+									"value": {
+										"value": "@{pipeline()?.TriggeredByPipelineName}",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"strTriggeredByPipelineRunID": {
+									"value": {
+										"value": "@{pipeline()?.TriggeredByPipelineRunId}",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"strTriggerName": {
+									"value": {
+										"value": "@{pipeline().TriggerName}",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"strTriggerType": {
+									"value": {
+										"value": "@{pipeline().TriggerType}",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"uniqGroupID": {
+									"value": {
+										"value": "@{pipeline().GroupId}",
+										"type": "Expression"
+									},
+									"type": "Guid"
+								},
+								"uniqRunID": {
+									"value": {
+										"value": "@{pipeline().RunId}",
+										"type": "Expression"
+									},
+									"type": "Guid"
+								},
+								"uniqTriggerID": {
+									"value": {
+										"value": "@guid()",
+										"type": "Expression"
+									},
+									"type": "Guid"
+								},
+								"strSequenceList": {
+									"value": "[[-]",
+									"type": "String"
+								},
+								"strLoadType": {
+									"value": {
+										"value": "@pipeline().parameters.LoadType",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "Control",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"PipelineName": {
+						"type": "string"
+					},
+					"LoadType": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"RunStart": {
+						"type": "String"
+					},
+					"RunEnd": {
+						"type": "String"
+					},
+					"Duration_SS": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "OH_D365_DataSync/Child Packages/Reset"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-11-20T17:01:48Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Control')]",
+				"[concat(variables('factoryId'), '/datasets/DS_SQL_Control')]",
+				"[concat(variables('factoryId'), '/linkedServices/SqlServer_OnPrem')]"
 			]
 		},
 		{
@@ -1290,433 +1717,6 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_Datalake_PipeDelimited')]",
 				"[concat(variables('factoryId'), '/datasets/DS_Dataverse')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_DailyLoad_Post')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "RunStart",
-						"type": "SetVariable",
-						"dependsOn": [],
-						"policy": {
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "RunStart",
-							"value": {
-								"value": "@string(utcNow())",
-								"type": "Expression"
-							}
-						}
-					},
-					{
-						"name": "RunEnd",
-						"type": "SetVariable",
-						"dependsOn": [
-							{
-								"activity": "SourceSystem",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "RunEnd",
-							"value": {
-								"value": "@string(utcNow())",
-								"type": "Expression"
-							}
-						}
-					},
-					{
-						"name": "Duration_SS",
-						"type": "SetVariable",
-						"dependsOn": [
-							{
-								"activity": "RunEnd",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "Duration_SS",
-							"value": {
-								"value": "@string(div(sub(ticks(formatDateTime(variables('RunEnd'))),ticks(formatDateTime(variables('RunStart')))),10000000))",
-								"type": "Expression"
-							}
-						}
-					},
-					{
-						"name": "PipelineAuditLog - End - Success",
-						"type": "SqlServerStoredProcedure",
-						"dependsOn": [
-							{
-								"activity": "Duration_SS",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"storedProcedureName": "[[dbo].[spUpdate_PipelineAuditLog_End]",
-							"storedProcedureParameters": {
-								"dtRunEnd": {
-									"value": {
-										"value": "@variables('RunEnd')",
-										"type": "Expression"
-									},
-									"type": "DateTime"
-								},
-								"intDuration_SS": {
-									"value": {
-										"value": "@variables('Duration_SS')",
-										"type": "Expression"
-									},
-									"type": "Int32"
-								},
-								"strStatus": {
-									"value": "Succeeded",
-									"type": "String"
-								},
-								"uniqRunID": {
-									"value": {
-										"value": "@pipeline().RunId",
-										"type": "Expression"
-									},
-									"type": "Guid"
-								}
-							}
-						},
-						"linkedServiceName": {
-							"referenceName": "Control",
-							"type": "LinkedServiceReference"
-						}
-					},
-					{
-						"name": "PipelineAuditLog - End - Failed",
-						"type": "SqlServerStoredProcedure",
-						"dependsOn": [
-							{
-								"activity": "SourceSystem",
-								"dependencyConditions": [
-									"Failed"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"storedProcedureName": "[[dbo].[spUpdate_PipelineAuditLog_End]",
-							"storedProcedureParameters": {
-								"dtRunEnd": {
-									"value": {
-										"value": "@utcnow()",
-										"type": "Expression"
-									},
-									"type": "DateTime"
-								},
-								"intDuration_SS": {
-									"value": "0",
-									"type": "Int32"
-								},
-								"strStatus": {
-									"value": "Failed",
-									"type": "String"
-								},
-								"uniqRunID": {
-									"value": {
-										"value": "@pipeline().RunId",
-										"type": "Expression"
-									},
-									"type": "Guid"
-								}
-							}
-						},
-						"linkedServiceName": {
-							"referenceName": "Control",
-							"type": "LinkedServiceReference"
-						}
-					},
-					{
-						"name": "SourceSystems",
-						"type": "Lookup",
-						"dependsOn": [
-							{
-								"activity": "PipelineAuditLog - Start",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderStoredProcedureName": "[[dbo].[spGet_PipelineParameters_SourceSystems]",
-								"storedProcedureParameters": {
-									"pipeline": {
-										"type": "String",
-										"value": {
-											"value": "@pipeline().parameters.PipelineName",
-											"type": "Expression"
-										}
-									}
-								},
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_SQL_Control",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "SourceSystem",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "SourceSystems",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('SourceSystems').output.value\n",
-								"type": "Expression"
-							},
-							"isSequential": true,
-							"activities": [
-								{
-									"name": "Post Daily Load - Checksum",
-									"type": "SqlServerStoredProcedure",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"storedProcedureName": "[[d365].[spUpdate_PostDailyLoad_Checksum]"
-									},
-									"linkedServiceName": {
-										"referenceName": "SqlServer_OnPrem",
-										"type": "LinkedServiceReference",
-										"parameters": {
-											"ServerName": {
-												"value": "@item().SrcServer",
-												"type": "Expression"
-											},
-											"DatabaseName": {
-												"value": "@item().SrcDatabase",
-												"type": "Expression"
-											}
-										}
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "PipelineAuditLog - Start",
-						"type": "SqlServerStoredProcedure",
-						"dependsOn": [
-							{
-								"activity": "RunStart",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"storedProcedureName": "[[dbo].[spInsert_PipelineAuditLog_Start]",
-							"storedProcedureParameters": {
-								"dtRunStart": {
-									"value": {
-										"value": "@variables('RunStart')",
-										"type": "Expression"
-									},
-									"type": "DateTime"
-								},
-								"dtTriggerTime": {
-									"value": {
-										"value": "@{pipeline().TriggerTime}",
-										"type": "Expression"
-									},
-									"type": "DateTime"
-								},
-								"strDataFactory": {
-									"value": {
-										"value": "@{pipeline().DataFactory}",
-										"type": "Expression"
-									},
-									"type": "String"
-								},
-								"strPipeline": {
-									"value": {
-										"value": "@{pipeline().Pipeline}",
-										"type": "Expression"
-									},
-									"type": "String"
-								},
-								"strStatus": {
-									"value": "In Progress",
-									"type": "String"
-								},
-								"strTriggeredByPipelineName": {
-									"value": {
-										"value": "@{pipeline()?.TriggeredByPipelineName}",
-										"type": "Expression"
-									},
-									"type": "String"
-								},
-								"strTriggeredByPipelineRunID": {
-									"value": {
-										"value": "@{pipeline()?.TriggeredByPipelineRunId}",
-										"type": "Expression"
-									},
-									"type": "String"
-								},
-								"strTriggerName": {
-									"value": {
-										"value": "@{pipeline().TriggerName}",
-										"type": "Expression"
-									},
-									"type": "String"
-								},
-								"strTriggerType": {
-									"value": {
-										"value": "@{pipeline().TriggerType}",
-										"type": "Expression"
-									},
-									"type": "String"
-								},
-								"uniqGroupID": {
-									"value": {
-										"value": "@{pipeline().GroupId}",
-										"type": "Expression"
-									},
-									"type": "Guid"
-								},
-								"uniqRunID": {
-									"value": {
-										"value": "@{pipeline().RunId}",
-										"type": "Expression"
-									},
-									"type": "Guid"
-								},
-								"uniqTriggerID": {
-									"value": {
-										"value": "@guid()",
-										"type": "Expression"
-									},
-									"type": "Guid"
-								},
-								"strSequenceList": {
-									"value": "[[-]",
-									"type": "String"
-								},
-								"strLoadType": {
-									"value": {
-										"value": "@pipeline().parameters.LoadType",
-										"type": "Expression"
-									},
-									"type": "String"
-								}
-							}
-						},
-						"linkedServiceName": {
-							"referenceName": "Control",
-							"type": "LinkedServiceReference"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"PipelineName": {
-						"type": "string"
-					},
-					"LoadType": {
-						"type": "string"
-					}
-				},
-				"variables": {
-					"RunStart": {
-						"type": "String"
-					},
-					"RunEnd": {
-						"type": "String"
-					},
-					"Duration_SS": {
-						"type": "String"
-					}
-				},
-				"folder": {
-					"name": "OH_D365_DataSync/Child Packages/Reset"
-				},
-				"annotations": [],
-				"lastPublishTime": "2023-11-20T17:01:48Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/Control')]",
-				"[concat(variables('factoryId'), '/datasets/DS_SQL_Control')]",
-				"[concat(variables('factoryId'), '/linkedServices/SqlServer_OnPrem')]"
 			]
 		},
 		{
@@ -2493,7 +2493,7 @@
 																},
 																{
 																	"name": "PipelineAuditDetailLog_2 Account",
-																	"type": "Copy",
+																	"type": "SqlServerStoredProcedure",
 																	"dependsOn": [
 																		{
 																			"activity": "Trfd_to_Dest - Account",
@@ -2511,47 +2511,197 @@
 																	},
 																	"userProperties": [],
 																	"typeProperties": {
-																		"source": {
-																			"type": "AzureSqlSource",
-																			"sqlReaderQuery": {
-																				"value": "SELECT \n\n'@{pipeline().DataFactory}' as DataFactoryName,\n'@{pipeline().Pipeline}' as PipelineName,\n'@{pipeline().RunId}' as RunID,\n\n'@{item().SrcSystem}' as SrcSystem,\n'@{item().SrcStoredProcedure}' as Source,\n'@{item().DestEntity}' as Destination,\n'Trfd_to_Dest - Account' as CopyActivity,\n\n'@{pipeline().TriggerType}' as TriggerType,\n'@{pipeline().TriggerId}' as TriggerID,\n'@{pipeline().TriggerName}' as TriggerName,\n'@{pipeline().TriggerTime}' as TriggerTime,\n\n'@{activity('Trfd_to_Dest - Account').output.rowsCopied}' as RowsCopied,\n'@{activity('Trfd_to_Dest - Account').output.rowsRead}' as RowsRead,\n'@{activity('Trfd_to_Dest - Account').output.rowsSkipped}' as RowsSkipped,\n'@{activity('Trfd_to_Dest - Account').output.usedParallelCopies}' as ParallelCopies,\n'@{activity('Trfd_to_Dest - Account').output.copyDuration}' as CopyDuration_SS,\n'@{activity('Trfd_to_Dest - Account').output.effectiveIntegrationRuntime}' as EffectiveIntegrationRuntime,\n\n'@{activity('Trfd_to_Dest - Account').output.executionDetails[0].source.type}' as SourceType,\n'@{activity('Trfd_to_Dest - Account').output.executionDetails[0].sink.type}' as SinkType,\n'@{activity('Trfd_to_Dest - Account').output.executionDetails[0].status}' as ExecutionStatus,\n'@{activity('Trfd_to_Dest - Account').output.executionDetails[0].start}' as CopyActivity_StartTime,\n'@{utcnow()}' as CopyActivity_EndTime,\n'@{activity('Trfd_to_Dest - Account').output.executionDetails[0].detailedDurations.queuingDuration}' as CopyActivity_QueuingDuration_SS,\n'@{activity('Trfd_to_Dest - Account').output.executionDetails[0].detailedDurations.queuingDuration}' as CopyActivity_TimeToFirstByte_SS,\n'@{activity('Trfd_to_Dest - Account').output.executionDetails[0].detailedDurations.transferDuration}' as CopyActivity_TransferDuration_SS,\n2 as CopyActivity_Stage,\n'@{pipeline().parameters.SequenceGroup}' as SequenceGroup\n\n",
-																				"type": "Expression"
+																		"storedProcedureName": "[[dbo].[spInsert_PipelineAuditDetailLog]",
+																		"storedProcedureParameters": {
+																			"dtCopyActivity_EndTime": {
+																				"value": {
+																					"value": "@{utcnow()}",
+																					"type": "Expression"
+																				},
+																				"type": "DateTime"
 																			},
-																			"queryTimeout": "02:00:00",
-																			"partitionOption": "None"
-																		},
-																		"sink": {
-																			"type": "AzureSqlSink",
-																			"writeBehavior": "insert",
-																			"sqlWriterUseTableLock": false
-																		},
-																		"enableStaging": false,
-																		"translator": {
-																			"type": "TabularTranslator",
-																			"typeConversion": true,
-																			"typeConversionSettings": {
-																				"allowDataTruncation": true,
-																				"treatBooleanAsNumber": false
+																			"dtCopyActivity_StartTime": {
+																				"value": {
+																					"value": "@{activity('Trfd_to_Dest - Account').output.executionDetails[0].start}",
+																					"type": "Expression"
+																				},
+																				"type": "DateTime"
+																			},
+																			"dtTriggerTime": {
+																				"value": {
+																					"value": "@{pipeline().TriggerTime}",
+																					"type": "Expression"
+																				},
+																				"type": "DateTime"
+																			},
+																			"intCopyActivity_Stage": {
+																				"value": "2",
+																				"type": "Int32"
+																			},
+																			"intParallelCopies": {
+																				"value": {
+																					"value": "@{activity('Trfd_to_Dest - Account').output.usedParallelCopies}",
+																					"type": "Expression"
+																				},
+																				"type": "Int32"
+																			},
+																			"intRowsCopied": {
+																				"value": {
+																					"value": "@{activity('Trfd_to_Dest - Account').output.rowsCopied}",
+																					"type": "Expression"
+																				},
+																				"type": "Int32"
+																			},
+																			"intRowsRead": {
+																				"value": {
+																					"value": "@{activity('Trfd_to_Dest - Account').output.rowsRead}",
+																					"type": "Expression"
+																				},
+																				"type": "Int32"
+																			},
+																			"intRowsSkipped": {
+																				"value": {
+																					"value": "@{activity('Trfd_to_Dest - Account').output.rowsSkipped}",
+																					"type": "Expression"
+																				},
+																				"type": "Int32"
+																			},
+																			"intSequenceGroup": {
+																				"value": {
+																					"value": "@{pipeline().parameters.SequenceGroup}",
+																					"type": "Expression"
+																				},
+																				"type": "Int32"
+																			},
+																			"strCopyActivity": {
+																				"value": "Trfd_to_Dest - Account",
+																				"type": "String"
+																			},
+																			"strCopyActivity_QueuingDuration_SS": {
+																				"value": {
+																					"value": "@{activity('Trfd_to_Dest - Account').output.executionDetails[0].detailedDurations.queuingDuration}",
+																					"type": "Expression"
+																				},
+																				"type": "String"
+																			},
+																			"strCopyActivity_TimeToFirstByte_SS": {
+																				"value": {
+																					"value": "@{activity('Trfd_to_Dest - Account').output.executionDetails[0].detailedDurations.queuingDuration}",
+																					"type": "Expression"
+																				},
+																				"type": "String"
+																			},
+																			"strCopyActivity_TransferDuration_SS": {
+																				"value": {
+																					"value": "@{activity('Trfd_to_Dest - Account').output.executionDetails[0].detailedDurations.transferDuration}",
+																					"type": "Expression"
+																				},
+																				"type": "String"
+																			},
+																			"strCopyDuration_SS": {
+																				"value": {
+																					"value": "@{activity('Trfd_to_Dest - Account').output.copyDuration}",
+																					"type": "Expression"
+																				},
+																				"type": "String"
+																			},
+																			"strDataFactory": {
+																				"value": {
+																					"value": "@{pipeline().DataFactory}",
+																					"type": "Expression"
+																				},
+																				"type": "String"
+																			},
+																			"strDestination": {
+																				"value": {
+																					"value": "@{item().DestEntity}",
+																					"type": "Expression"
+																				},
+																				"type": "String"
+																			},
+																			"strEffectiveIntegrationRuntime": {
+																				"value": {
+																					"value": "@{activity('Trfd_to_Dest - Account').output.effectiveIntegrationRuntime}",
+																					"type": "Expression"
+																				},
+																				"type": "String"
+																			},
+																			"strExecutionStatus": {
+																				"value": {
+																					"value": "@{activity('Trfd_to_Dest - Account').output.executionDetails[0].status}",
+																					"type": "Expression"
+																				},
+																				"type": "String"
+																			},
+																			"strPipeline": {
+																				"value": {
+																					"value": "@{pipeline().Pipeline}",
+																					"type": "Expression"
+																				},
+																				"type": "String"
+																			},
+																			"strSinkType": {
+																				"value": {
+																					"value": "@{activity('Trfd_to_Dest - Account').output.executionDetails[0].sink.type}",
+																					"type": "Expression"
+																				},
+																				"type": "String"
+																			},
+																			"strSource": {
+																				"value": {
+																					"value": "@{item().SrcStoredProcedure}",
+																					"type": "Expression"
+																				},
+																				"type": "String"
+																			},
+																			"strSourceType": {
+																				"value": {
+																					"value": "@{activity('Trfd_to_Dest - Account').output.executionDetails[0].source.type}",
+																					"type": "Expression"
+																				},
+																				"type": "String"
+																			},
+																			"strSrcSystem": {
+																				"value": {
+																					"value": "@{item().SrcSystem}",
+																					"type": "Expression"
+																				},
+																				"type": "String"
+																			},
+																			"strTriggerName": {
+																				"value": {
+																					"value": "@{pipeline().TriggerName}",
+																					"type": "Expression"
+																				},
+																				"type": "String"
+																			},
+																			"strTriggerType": {
+																				"value": {
+																					"value": "@{pipeline().TriggerType}",
+																					"type": "Expression"
+																				},
+																				"type": "String"
+																			},
+																			"uniqRunID": {
+																				"value": {
+																					"value": "@{pipeline().RunId}",
+																					"type": "Expression"
+																				},
+																				"type": "Guid"
+																			},
+																			"uniqTriggerID": {
+																				"value": {
+																					"value": "@{pipeline().TriggerId}",
+																					"type": "Expression"
+																				},
+																				"type": "Guid"
 																			}
 																		}
 																	},
-																	"inputs": [
-																		{
-																			"referenceName": "DS_SQL_Control",
-																			"type": "DatasetReference",
-																			"parameters": {}
-																		}
-																	],
-																	"outputs": [
-																		{
-																			"referenceName": "DS_SQL_Control_Tbl",
-																			"type": "DatasetReference",
-																			"parameters": {
-																				"SchemaName": "dbo",
-																				"TableName": "PipelineAuditDetailLog"
-																			}
-																		}
-																	]
+																	"linkedServiceName": {
+																		"referenceName": "Control",
+																		"type": "LinkedServiceReference"
+																	}
 																}
 															]
 														}
@@ -2644,68 +2794,6 @@
 												]
 											},
 											{
-												"name": "PipelineAuditDetailLog_1",
-												"type": "Copy",
-												"dependsOn": [
-													{
-														"activity": "Staging to Transformed",
-														"dependencyConditions": [
-															"Completed"
-														]
-													}
-												],
-												"policy": {
-													"timeout": "0.12:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"source": {
-														"type": "AzureSqlSource",
-														"sqlReaderQuery": {
-															"value": "SELECT \n\n'@{pipeline().DataFactory}' as DataFactoryName,\n'@{pipeline().Pipeline}' as PipelineName,\n'@{pipeline().RunId}' as RunID,\n\n'@{item().SrcSystem}' as SrcSystem,\n'@{item().SrcStoredProcedure}' as Source,\n'@{item().DestEntity}' as Destination,\n'Staging to Transformed' as CopyActivity,\n\n'@{pipeline().TriggerType}' as TriggerType,\n'@{pipeline().TriggerId}' as TriggerID,\n'@{pipeline().TriggerName}' as TriggerName,\n'@{pipeline().TriggerTime}' as TriggerTime,\n\n'@{activity('Staging to Transformed').output.rowsCopied}' as RowsCopied,\n'@{activity('Staging to Transformed').output.rowsRead}' as RowsRead,\n'@{activity('Staging to Transformed').output.rowsSkipped}' as RowsSkipped,\n'@{activity('Staging to Transformed').output.usedParallelCopies}' as ParallelCopies,\n'@{activity('Staging to Transformed').output.copyDuration}' as CopyDuration_SS,\n'@{activity('Staging to Transformed').output.effectiveIntegrationRuntime}' as EffectiveIntegrationRuntime,\n\n'@{activity('Staging to Transformed').output.executionDetails[0].source.type}' as SourceType,\n'@{activity('Staging to Transformed').output.executionDetails[0].sink.type}' as SinkType,\n'@{activity('Staging to Transformed').output.executionDetails[0].status}' as ExecutionStatus,\n'@{activity('Staging to Transformed').output.executionDetails[0].start}' as CopyActivity_StartTime,\n'@{utcnow()}' as CopyActivity_EndTime,\n'@{activity('Staging to Transformed').output.executionDetails[0].detailedDurations.queuingDuration}' as CopyActivity_QueuingDuration_SS,\n'@{activity('Staging to Transformed').output.executionDetails[0].detailedDurations.queuingDuration}' as CopyActivity_TimeToFirstByte_SS,\n'@{activity('Staging to Transformed').output.executionDetails[0].detailedDurations.transferDuration}' as CopyActivity_TransferDuration_SS,\n1 as CopyActivity_Stage,\n'@{pipeline().parameters.SequenceGroup}' as SequenceGroup\n\n",
-															"type": "Expression"
-														},
-														"queryTimeout": "02:00:00",
-														"partitionOption": "None"
-													},
-													"sink": {
-														"type": "AzureSqlSink",
-														"writeBehavior": "insert",
-														"sqlWriterUseTableLock": false
-													},
-													"enableStaging": false,
-													"translator": {
-														"type": "TabularTranslator",
-														"typeConversion": true,
-														"typeConversionSettings": {
-															"allowDataTruncation": true,
-															"treatBooleanAsNumber": false
-														}
-													}
-												},
-												"inputs": [
-													{
-														"referenceName": "DS_SQL_Control",
-														"type": "DatasetReference",
-														"parameters": {}
-													}
-												],
-												"outputs": [
-													{
-														"referenceName": "DS_SQL_Control_Tbl",
-														"type": "DatasetReference",
-														"parameters": {
-															"SchemaName": "dbo",
-															"TableName": "PipelineAuditDetailLog"
-														}
-													}
-												]
-											},
-											{
 												"name": "Destination to Config",
 												"type": "Copy",
 												"dependsOn": [
@@ -2782,68 +2870,6 @@
 												]
 											},
 											{
-												"name": "PipelineAuditDetailLog_3",
-												"type": "Copy",
-												"dependsOn": [
-													{
-														"activity": "Destination to Config",
-														"dependencyConditions": [
-															"Completed"
-														]
-													}
-												],
-												"policy": {
-													"timeout": "0.12:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"source": {
-														"type": "AzureSqlSource",
-														"sqlReaderQuery": {
-															"value": "SELECT \n\n'@{pipeline().DataFactory}' as DataFactoryName,\n'@{pipeline().Pipeline}' as PipelineName,\n'@{pipeline().RunId}' as RunID,\n\n'@{item().SrcSystem}' as SrcSystem,\n'@{item().SrcStoredProcedure}' as Source,\n'@{item().DestEntity}' as Destination,\n'Destination to Config' as CopyActivity,\n\n'@{pipeline().TriggerType}' as TriggerType,\n'@{pipeline().TriggerId}' as TriggerID,\n'@{pipeline().TriggerName}' as TriggerName,\n'@{pipeline().TriggerTime}' as TriggerTime,\n\n'@{activity('Destination to Config').output.rowsCopied}' as RowsCopied,\n'@{activity('Destination to Config').output.rowsRead}' as RowsRead,\n0 as RowsSkipped,\n'@{activity('Destination to Config').output.usedParallelCopies}' as ParallelCopies,\n'@{activity('Destination to Config').output.copyDuration}' as CopyDuration_SS,\n'@{activity('Destination to Config').output.effectiveIntegrationRuntime}' as EffectiveIntegrationRuntime,\n\n'@{activity('Destination to Config').output.executionDetails[0].source.type}' as SourceType,\n'@{activity('Destination to Config').output.executionDetails[0].sink.type}' as SinkType,\n'@{activity('Destination to Config').output.executionDetails[0].status}' as ExecutionStatus,\n'@{activity('Destination to Config').output.executionDetails[0].start}' as CopyActivity_StartTime,\n'@{utcnow()}' as CopyActivity_EndTime,\n'@{activity('Destination to Config').output.executionDetails[0].detailedDurations.queuingDuration}' as CopyActivity_QueuingDuration_SS,\n'@{activity('Destination to Config').output.executionDetails[0].detailedDurations.queuingDuration}' as CopyActivity_TimeToFirstByte_SS,\n'@{activity('Destination to Config').output.executionDetails[0].detailedDurations.transferDuration}' as CopyActivity_TransferDuration_SS,\n3 as CopyActivity_Stage,\n'@{pipeline().parameters.SequenceGroup}' as SequenceGroup\n",
-															"type": "Expression"
-														},
-														"queryTimeout": "02:00:00",
-														"partitionOption": "None"
-													},
-													"sink": {
-														"type": "AzureSqlSink",
-														"writeBehavior": "insert",
-														"sqlWriterUseTableLock": false
-													},
-													"enableStaging": false,
-													"translator": {
-														"type": "TabularTranslator",
-														"typeConversion": true,
-														"typeConversionSettings": {
-															"allowDataTruncation": true,
-															"treatBooleanAsNumber": false
-														}
-													}
-												},
-												"inputs": [
-													{
-														"referenceName": "DS_SQL_Control",
-														"type": "DatasetReference",
-														"parameters": {}
-													}
-												],
-												"outputs": [
-													{
-														"referenceName": "DS_SQL_Control_Tbl",
-														"type": "DatasetReference",
-														"parameters": {
-															"SchemaName": "dbo",
-															"TableName": "PipelineAuditDetailLog"
-														}
-													}
-												]
-											},
-											{
 												"name": "AuditLog",
 												"description": "exec [spInsert_Core_A_AuditLog]",
 												"type": "SqlServerStoredProcedure",
@@ -2896,71 +2922,430 @@
 														}
 													}
 												}
+											},
+											{
+												"name": "PipelineAuditDetailLog_1",
+												"type": "SqlServerStoredProcedure",
+												"dependsOn": [
+													{
+														"activity": "Staging to Transformed",
+														"dependencyConditions": [
+															"Completed"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"storedProcedureName": "[[dbo].[spInsert_PipelineAuditDetailLog]",
+													"storedProcedureParameters": {
+														"dtCopyActivity_EndTime": {
+															"value": {
+																"value": "@{utcnow()}",
+																"type": "Expression"
+															},
+															"type": "DateTime"
+														},
+														"dtCopyActivity_StartTime": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.executionDetails[0].start}",
+																"type": "Expression"
+															},
+															"type": "DateTime"
+														},
+														"dtTriggerTime": {
+															"value": {
+																"value": "@{pipeline().TriggerTime}",
+																"type": "Expression"
+															},
+															"type": "DateTime"
+														},
+														"intCopyActivity_Stage": {
+															"value": "1",
+															"type": "Int32"
+														},
+														"intParallelCopies": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.usedParallelCopies}",
+																"type": "Expression"
+															},
+															"type": "Int32"
+														},
+														"intRowsCopied": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.rowsCopied}",
+																"type": "Expression"
+															},
+															"type": "Int32"
+														},
+														"intRowsRead": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.rowsRead}",
+																"type": "Expression"
+															},
+															"type": "Int32"
+														},
+														"intRowsSkipped": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.rowsSkipped}",
+																"type": "Expression"
+															},
+															"type": "Int32"
+														},
+														"intSequenceGroup": {
+															"value": {
+																"value": "@{pipeline().parameters.SequenceGroup}",
+																"type": "Expression"
+															},
+															"type": "Int32"
+														},
+														"strCopyActivity": {
+															"value": "Staging to Transformed",
+															"type": "String"
+														},
+														"strCopyActivity_QueuingDuration_SS": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.executionDetails[0].detailedDurations.queuingDuration}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strCopyActivity_TimeToFirstByte_SS": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.executionDetails[0].detailedDurations.queuingDuration}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strCopyActivity_TransferDuration_SS": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.executionDetails[0].detailedDurations.transferDuration}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strCopyDuration_SS": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.copyDuration}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strDataFactory": {
+															"value": {
+																"value": "@{pipeline().DataFactory}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strDestination": {
+															"value": {
+																"value": "@{item().DestEntity}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strEffectiveIntegrationRuntime": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.effectiveIntegrationRuntime}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strExecutionStatus": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.executionDetails[0].status}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strPipeline": {
+															"value": {
+																"value": "@{pipeline().Pipeline}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strSinkType": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.executionDetails[0].sink.type}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strSource": {
+															"value": {
+																"value": "@{item().SrcStoredProcedure}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strSourceType": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.executionDetails[0].source.type}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strSrcSystem": {
+															"value": {
+																"value": "@{item().SrcSystem}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strTriggerName": {
+															"value": {
+																"value": "@{pipeline().TriggerName}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strTriggerType": {
+															"value": {
+																"value": "@{pipeline().TriggerType}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"uniqRunID": {
+															"value": {
+																"value": "@{pipeline().RunId}",
+																"type": "Expression"
+															},
+															"type": "Guid"
+														},
+														"uniqTriggerID": {
+															"value": {
+																"value": "@{pipeline().TriggerId}",
+																"type": "Expression"
+															},
+															"type": "Guid"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "Control",
+													"type": "LinkedServiceReference"
+												}
+											},
+											{
+												"name": "PipelineAuditDetailLog_3",
+												"type": "SqlServerStoredProcedure",
+												"dependsOn": [
+													{
+														"activity": "Destination to Config",
+														"dependencyConditions": [
+															"Completed"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"storedProcedureName": "[[dbo].[spInsert_PipelineAuditDetailLog]",
+													"storedProcedureParameters": {
+														"dtCopyActivity_EndTime": {
+															"value": {
+																"value": "@{utcnow()}",
+																"type": "Expression"
+															},
+															"type": "DateTime"
+														},
+														"dtCopyActivity_StartTime": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.executionDetails[0].start}",
+																"type": "Expression"
+															},
+															"type": "DateTime"
+														},
+														"dtTriggerTime": {
+															"value": {
+																"value": "@{pipeline().TriggerTime}",
+																"type": "Expression"
+															},
+															"type": "DateTime"
+														},
+														"intCopyActivity_Stage": {
+															"value": "3",
+															"type": "Int32"
+														},
+														"intParallelCopies": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.usedParallelCopies}",
+																"type": "Expression"
+															},
+															"type": "Int32"
+														},
+														"intRowsCopied": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.rowsCopied}",
+																"type": "Expression"
+															},
+															"type": "Int32"
+														},
+														"intRowsRead": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.rowsRead}",
+																"type": "Expression"
+															},
+															"type": "Int32"
+														},
+														"intRowsSkipped": {
+															"value": "0",
+															"type": "Int32"
+														},
+														"intSequenceGroup": {
+															"value": {
+																"value": "@{pipeline().parameters.SequenceGroup}",
+																"type": "Expression"
+															},
+															"type": "Int32"
+														},
+														"strCopyActivity": {
+															"value": "Destination to Config",
+															"type": "String"
+														},
+														"strCopyActivity_QueuingDuration_SS": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.executionDetails[0].detailedDurations.queuingDuration}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strCopyActivity_TimeToFirstByte_SS": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.executionDetails[0].detailedDurations.queuingDuration}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strCopyActivity_TransferDuration_SS": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.executionDetails[0].detailedDurations.transferDuration}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strCopyDuration_SS": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.copyDuration}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strDataFactory": {
+															"value": {
+																"value": "@{pipeline().DataFactory}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strDestination": {
+															"value": {
+																"value": "@{item().DestEntity}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strEffectiveIntegrationRuntime": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.effectiveIntegrationRuntime}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strExecutionStatus": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.executionDetails[0].status}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strPipeline": {
+															"value": {
+																"value": "@{pipeline().Pipeline}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strSinkType": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.executionDetails[0].sink.type}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strSource": {
+															"value": {
+																"value": "@{item().SrcStoredProcedure}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strSourceType": {
+															"value": {
+																"value": "@{activity('Staging to Transformed').output.executionDetails[0].source.type}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strSrcSystem": {
+															"value": {
+																"value": "@{item().SrcSystem}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strTriggerName": {
+															"value": {
+																"value": "@{pipeline().TriggerName}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"strTriggerType": {
+															"value": {
+																"value": "@{pipeline().TriggerType}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"uniqRunID": {
+															"value": {
+																"value": "@{pipeline().RunId}",
+																"type": "Expression"
+															},
+															"type": "Guid"
+														},
+														"uniqTriggerID": {
+															"value": {
+																"value": "@{pipeline().TriggerId}",
+																"type": "Expression"
+															},
+															"type": "Guid"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "Control",
+													"type": "LinkedServiceReference"
+												}
 											}
 										]
 									}
-								},
-								{
-									"name": "PipelineAuditDetailLog_0",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "OH to Staging",
-											"dependencyConditions": [
-												"Completed"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "AzureSqlSource",
-											"sqlReaderQuery": {
-												"value": "SELECT \n\n'@{pipeline().DataFactory}' as DataFactoryName,\n'@{pipeline().Pipeline}' as PipelineName,\n'@{pipeline().RunId}' as RunID,\n\n'@{item().SrcSystem}' as SrcSystem,\n'@{item().SrcStoredProcedure}' as Source,\n'@{item().DestEntity}' as Destination,\n'OH to Staging' as CopyActivity,\n\n'@{pipeline().TriggerType}' as TriggerType,\n'@{pipeline().TriggerId}' as TriggerID,\n'@{pipeline().TriggerName}' as TriggerName,\n'@{pipeline().TriggerTime}' as TriggerTime,\n\n'@{activity('OH to Staging').output.rowsCopied}' as RowsCopied,\n'@{activity('OH to Staging').output.rowsRead}' as RowsRead,\n'@{activity('OH to Staging').output.rowsSkipped}' as RowsSkipped,\n'@{activity('OH to Staging').output.usedParallelCopies}' as ParallelCopies,\n'@{activity('OH to Staging').output.copyDuration}' as CopyDuration_SS,\n'@{activity('OH to Staging').output.effectiveIntegrationRuntime}' as EffectiveIntegrationRuntime,\n\n'@{activity('OH to Staging').output.executionDetails[0].source.type}' as SourceType,\n'@{activity('OH to Staging').output.executionDetails[0].sink.type}' as SinkType,\n'@{activity('OH to Staging').output.executionDetails[0].status}' as ExecutionStatus,\n'@{activity('OH to Staging').output.executionDetails[0].start}' as CopyActivity_StartTime,\n'@{utcnow()}' as CopyActivity_EndTime,\n'@{activity('OH to Staging').output.executionDetails[0].detailedDurations.queuingDuration}' as CopyActivity_QueuingDuration_SS,\n'@{activity('OH to Staging').output.executionDetails[0].detailedDurations.queuingDuration}' as CopyActivity_TimeToFirstByte_SS,\n'@{activity('OH to Staging').output.executionDetails[0].detailedDurations.transferDuration}' as CopyActivity_TransferDuration_SS,\n0 as CopyActivity_Stage,\n'@{pipeline().parameters.SequenceGroup}' as SequenceGroup\n\n",
-												"type": "Expression"
-											},
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "AzureSqlSink",
-											"writeBehavior": "insert",
-											"sqlWriterUseTableLock": false
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "DS_SQL_Control",
-											"type": "DatasetReference",
-											"parameters": {}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "DS_SQL_Control_Tbl",
-											"type": "DatasetReference",
-											"parameters": {
-												"SchemaName": "dbo",
-												"TableName": "PipelineAuditDetailLog"
-											}
-										}
-									]
 								},
 								{
 									"name": "OH to Staging",
@@ -3071,6 +3456,218 @@
 											}
 										}
 									]
+								},
+								{
+									"name": "PipelineAuditDetailLog_0",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [
+										{
+											"activity": "OH to Staging",
+											"dependencyConditions": [
+												"Completed"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[dbo].[spInsert_PipelineAuditDetailLog]",
+										"storedProcedureParameters": {
+											"dtCopyActivity_EndTime": {
+												"value": {
+													"value": "@{utcnow()}",
+													"type": "Expression"
+												},
+												"type": "DateTime"
+											},
+											"dtCopyActivity_StartTime": {
+												"value": {
+													"value": "@{activity('OH to Staging').output.executionDetails[0].start}",
+													"type": "Expression"
+												},
+												"type": "DateTime"
+											},
+											"dtTriggerTime": {
+												"value": {
+													"value": "@{pipeline().TriggerTime}",
+													"type": "Expression"
+												},
+												"type": "DateTime"
+											},
+											"intCopyActivity_Stage": {
+												"value": "0",
+												"type": "Int32"
+											},
+											"intParallelCopies": {
+												"value": {
+													"value": "@{activity('OH to Staging').output.usedParallelCopies}",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											},
+											"intRowsCopied": {
+												"value": {
+													"value": "@{activity('OH to Staging').output.rowsCopied}",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											},
+											"intRowsRead": {
+												"value": {
+													"value": "@{activity('OH to Staging').output.rowsRead}",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											},
+											"intRowsSkipped": {
+												"value": {
+													"value": "@{activity('OH to Staging').output.rowsSkipped}",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											},
+											"intSequenceGroup": {
+												"value": {
+													"value": "@{pipeline().parameters.SequenceGroup}",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											},
+											"strCopyActivity": {
+												"value": "OH to Staging",
+												"type": "String"
+											},
+											"strCopyActivity_QueuingDuration_SS": {
+												"value": {
+													"value": "@{activity('OH to Staging').output.executionDetails[0].detailedDurations.queuingDuration}",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"strCopyActivity_TimeToFirstByte_SS": {
+												"value": {
+													"value": "@{activity('OH to Staging').output.executionDetails[0].detailedDurations.queuingDuration}",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"strCopyActivity_TransferDuration_SS": {
+												"value": {
+													"value": "@{activity('OH to Staging').output.executionDetails[0].detailedDurations.transferDuration}",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"strCopyDuration_SS": {
+												"value": {
+													"value": "@{activity('OH to Staging').output.copyDuration}",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"strDataFactory": {
+												"value": {
+													"value": "@{pipeline().DataFactory}",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"strDestination": {
+												"value": {
+													"value": "@{item().DestEntity}",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"strEffectiveIntegrationRuntime": {
+												"value": {
+													"value": "@{activity('OH to Staging').output.effectiveIntegrationRuntime}",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"strExecutionStatus": {
+												"value": {
+													"value": "@{activity('OH to Staging').output.executionDetails[0].status}",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"strPipeline": {
+												"value": {
+													"value": "@{pipeline().Pipeline}",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"strSinkType": {
+												"value": {
+													"value": "@{activity('OH to Staging').output.executionDetails[0].sink.type}",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"strSource": {
+												"value": {
+													"value": "@{item().SrcStoredProcedure}",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"strSourceType": {
+												"value": {
+													"value": "@{activity('OH to Staging').output.executionDetails[0].source.type}",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"strSrcSystem": {
+												"value": {
+													"value": "@{item().SrcSystem}",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"strTriggerName": {
+												"value": {
+													"value": "@{pipeline().TriggerName}",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"strTriggerType": {
+												"value": {
+													"value": "@{pipeline().TriggerType}",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"uniqRunID": {
+												"value": {
+													"value": "@{pipeline().RunId}",
+													"type": "Expression"
+												},
+												"type": "Guid"
+											},
+											"uniqTriggerID": {
+												"value": {
+													"value": "@{pipeline().TriggerId}",
+													"type": "Expression"
+												},
+												"type": "Guid"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "Control",
+										"type": "LinkedServiceReference"
+									}
 								}
 							]
 						}
@@ -3405,7 +4002,6 @@
 				"[concat(variables('factoryId'), '/datasets/DS_SQL_Control')]",
 				"[concat(variables('factoryId'), '/linkedServices/Control')]",
 				"[concat(variables('factoryId'), '/datasets/DS_Datalake_PipeDelimited')]",
-				"[concat(variables('factoryId'), '/datasets/DS_SQL_Control_Tbl')]",
 				"[concat(variables('factoryId'), '/datasets/DS_SQL_OnPrem')]",
 				"[concat(variables('factoryId'), '/datasets/DS_SQL_OnPrem_Tbl')]",
 				"[concat(variables('factoryId'), '/linkedServices/SqlServer_OnPrem')]",
