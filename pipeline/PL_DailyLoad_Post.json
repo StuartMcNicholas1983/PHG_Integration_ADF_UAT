@@ -1,5 +1,5 @@
 {
-	"name": "PL_FullLoad_Post",
+	"name": "PL_DailyLoad_Post",
 	"properties": {
 		"activities": [
 			{
@@ -234,7 +234,7 @@
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "Post Full Load - Checksum",
+							"name": "Post Daily Load - Checksum",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [],
 							"policy": {
@@ -246,7 +246,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"storedProcedureName": "[d365].[spUpdate_PostFullLoad_Checksum]"
+								"storedProcedureName": "[d365].[spUpdate_PostDailyLoad_Checksum]"
 							},
 							"linkedServiceName": {
 								"referenceName": "SqlServer_OnPrem",

@@ -879,7 +879,7 @@
 									"userProperties": [],
 									"typeProperties": {
 										"pipeline": {
-											"referenceName": "PL_FullLoadReset",
+											"referenceName": "PL_FullLoad",
 											"type": "PipelineReference"
 										},
 										"waitOnCompletion": true,
@@ -1277,7 +1277,7 @@
 									"userProperties": [],
 									"typeProperties": {
 										"pipeline": {
-											"referenceName": "PL_FullLoadReset_Post",
+											"referenceName": "PL_FullLoad_Post",
 											"type": "PipelineReference"
 										},
 										"waitOnCompletion": true,
