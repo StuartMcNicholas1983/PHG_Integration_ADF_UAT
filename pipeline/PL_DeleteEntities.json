@@ -793,7 +793,7 @@
 												},
 												"dtCopyActivity_StartTime": {
 													"value": {
-														"value": "@{activity('Staging to Transformed').output.executionDetails[0].start}",
+														"value": "@{activity('Destination to Config').output.executionDetails[0].start}",
 														"type": "Expression"
 													},
 													"type": "DateTime"
@@ -811,21 +811,21 @@
 												},
 												"intParallelCopies": {
 													"value": {
-														"value": "@{activity('Staging to Transformed').output.usedParallelCopies}",
+														"value": "@{activity('Destination to Config').output.usedParallelCopies}",
 														"type": "Expression"
 													},
 													"type": "Int32"
 												},
 												"intRowsCopied": {
 													"value": {
-														"value": "@{activity('Staging to Transformed').output.rowsCopied}",
+														"value": "@{activity('Destination to Config').output.rowsCopied}",
 														"type": "Expression"
 													},
 													"type": "Int32"
 												},
 												"intRowsRead": {
 													"value": {
-														"value": "@{activity('Staging to Transformed').output.rowsRead}",
+														"value": "@{activity('Destination to Config').output.rowsRead}",
 														"type": "Expression"
 													},
 													"type": "Int32"
@@ -847,28 +847,28 @@
 												},
 												"strCopyActivity_QueuingDuration_SS": {
 													"value": {
-														"value": "@{activity('Staging to Transformed').output.executionDetails[0].detailedDurations.queuingDuration}",
+														"value": "@{activity('Destination to Config').output.executionDetails[0].detailedDurations.queuingDuration}",
 														"type": "Expression"
 													},
 													"type": "String"
 												},
 												"strCopyActivity_TimeToFirstByte_SS": {
 													"value": {
-														"value": "@{activity('Staging to Transformed').output.executionDetails[0].detailedDurations.queuingDuration}",
+														"value": "@{activity('Destination to Config').output.executionDetails[0].detailedDurations.queuingDuration}",
 														"type": "Expression"
 													},
 													"type": "String"
 												},
 												"strCopyActivity_TransferDuration_SS": {
 													"value": {
-														"value": "@{activity('Staging to Transformed').output.executionDetails[0].detailedDurations.transferDuration}",
+														"value": "@{activity('Destination to Config').output.executionDetails[0].detailedDurations.transferDuration}",
 														"type": "Expression"
 													},
 													"type": "String"
 												},
 												"strCopyDuration_SS": {
 													"value": {
-														"value": "@{activity('Staging to Transformed').output.copyDuration}",
+														"value": "@{activity('Destination to Config').output.copyDuration}",
 														"type": "Expression"
 													},
 													"type": "String"
@@ -889,14 +889,14 @@
 												},
 												"strEffectiveIntegrationRuntime": {
 													"value": {
-														"value": "@{activity('Staging to Transformed').output.effectiveIntegrationRuntime}",
+														"value": "@{activity('Destination to Config').output.effectiveIntegrationRuntime}",
 														"type": "Expression"
 													},
 													"type": "String"
 												},
 												"strExecutionStatus": {
 													"value": {
-														"value": "@{activity('Staging to Transformed').output.executionDetails[0].status}",
+														"value": "@{activity('Destination to Config').output.executionDetails[0].status}",
 														"type": "Expression"
 													},
 													"type": "String"
@@ -910,7 +910,7 @@
 												},
 												"strSinkType": {
 													"value": {
-														"value": "@{activity('Staging to Transformed').output.executionDetails[0].sink.type}",
+														"value": "@{activity('Destination to Config').output.executionDetails[0].sink.type}",
 														"type": "Expression"
 													},
 													"type": "String"
@@ -924,7 +924,7 @@
 												},
 												"strSourceType": {
 													"value": {
-														"value": "@{activity('Staging to Transformed').output.executionDetails[0].source.type}",
+														"value": "@{activity('Destination to Config').output.executionDetails[0].source.type}",
 														"type": "Expression"
 													},
 													"type": "String"
