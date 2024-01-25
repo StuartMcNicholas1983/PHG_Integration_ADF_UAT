@@ -823,7 +823,7 @@
 														},
 														"dtCopyActivity_StartTime": {
 															"value": {
-																"value": "@{activity('D365_TransactionCurrency to SQL').output.executionDetails[0].start}",
+																"value": "@{activity('D365_Stringmap to SQL').output.executionDetails[0].start}",
 																"type": "Expression"
 															},
 															"type": "DateTime"
