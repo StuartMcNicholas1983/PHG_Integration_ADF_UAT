@@ -1339,7 +1339,7 @@
 															}
 														},
 														{
-															"name": "PipelineAuditDetailLog_2 Property",
+															"name": "PipelineAuditDetailLog_2 - Property",
 															"type": "SqlServerStoredProcedure",
 															"dependsOn": [
 																{
@@ -1997,7 +1997,7 @@
 															}
 														},
 														{
-															"name": "PipelineAuditDetailLog_2 Tenancy",
+															"name": "PipelineAuditDetailLog_2 - Tenancy",
 															"type": "SqlServerStoredProcedure",
 															"dependsOn": [
 																{
@@ -2742,7 +2742,7 @@
 															}
 														},
 														{
-															"name": "PipelineAuditDetailLog_2 Contact",
+															"name": "PipelineAuditDetailLog_2 - Contact",
 															"type": "SqlServerStoredProcedure",
 															"dependsOn": [
 																{
