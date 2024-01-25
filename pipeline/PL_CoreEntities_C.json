@@ -778,7 +778,7 @@
 															}
 														},
 														{
-															"name": "PipelineAuditDetailLog_2 HousingAccount",
+															"name": "PipelineAuditDetailLog_2 - HousingAccount",
 															"type": "SqlServerStoredProcedure",
 															"dependsOn": [
 																{
@@ -1270,7 +1270,7 @@
 															}
 														},
 														{
-															"name": "PipelineAuditDetailLog_2 HouseholdMember",
+															"name": "PipelineAuditDetailLog_2 - HouseholdMember",
 															"type": "SqlServerStoredProcedure",
 															"dependsOn": [
 																{
@@ -1817,7 +1817,7 @@
 															}
 														},
 														{
-															"name": "PipelineAuditDetailLog_2 Warranty",
+															"name": "PipelineAuditDetailLog_2 - Warranty",
 															"type": "SqlServerStoredProcedure",
 															"dependsOn": [
 																{
@@ -2298,7 +2298,7 @@
 															}
 														},
 														{
-															"name": "PipelineAuditDetailLog_2 Component",
+															"name": "PipelineAuditDetailLog_2 - Component",
 															"type": "SqlServerStoredProcedure",
 															"dependsOn": [
 																{
@@ -2900,7 +2900,7 @@
 															}
 														},
 														{
-															"name": "PipelineAuditDetailLog_2 ServiceCharge",
+															"name": "PipelineAuditDetailLog_2 - ServiceCharge",
 															"type": "SqlServerStoredProcedure",
 															"dependsOn": [
 																{
@@ -3337,7 +3337,7 @@
 															}
 														},
 														{
-															"name": "PipelineAuditDetailLog_2 VulnerabilityContact",
+															"name": "PipelineAuditDetailLog_2 - VulnerabilityContact",
 															"type": "SqlServerStoredProcedure",
 															"dependsOn": [
 																{
