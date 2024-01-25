@@ -4172,6 +4172,23 @@
 								},
 								"enableStaging": false,
 								"enableSkipIncompatibleRow": true,
+								"logSettings": {
+									"enableCopyActivityLog": true,
+									"copyActivityLogSettings": {
+										"logLevel": "Warning",
+										"enableReliableLogging": true
+									},
+									"logLocationSettings": {
+										"linkedServiceName": {
+											"referenceName": "DataLake",
+											"type": "LinkedServiceReference"
+										},
+										"path": {
+											"value": "@concat('data-sync/OH_D365_DataSync/Logs/',item().SrcSystem,'/Core_C')",
+											"type": "Expression"
+										}
+									}
+								},
 								"translator": {
 									"type": "TabularTranslator",
 									"typeConversion": true,
