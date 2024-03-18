@@ -84,6 +84,9 @@
 							"name": "Reference Entities",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
@@ -196,6 +199,9 @@
 							"name": "Core Entities_A",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
@@ -308,6 +314,9 @@
 							"name": "Lookup Entities",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
@@ -420,6 +429,9 @@
 							"name": "Delete Entities",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
@@ -532,6 +544,9 @@
 							"name": "Transactional Entities",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
@@ -709,6 +724,9 @@
 							"name": "Core_B Entities",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
@@ -821,6 +839,9 @@
 							"name": "Core_C Entities",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
@@ -876,6 +897,9 @@
 									"name": "Full Load",
 									"type": "ExecutePipeline",
 									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"pipeline": {
@@ -907,7 +931,17 @@
 								{
 									"name": "Entity Duplicates",
 									"type": "ExecutePipeline",
-									"dependsOn": [],
+									"dependsOn": [
+										{
+											"activity": "Daily Load",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"pipeline": {
@@ -928,30 +962,33 @@
 									}
 								},
 								{
-									"name": "Control - Reset PipelineRunsToday - Incremental",
-									"type": "SqlServerStoredProcedure",
-									"dependsOn": [
-										{
-											"activity": "Entity Duplicates",
-											"dependencyConditions": [
-												"Completed"
-											]
-										}
-									],
+									"name": "Daily Load",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
 									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
 										"secureInput": false
 									},
 									"userProperties": [],
 									"typeProperties": {
-										"storedProcedureName": "[dbo].[spUpdate_PipelineParameters_PipelineRunsToday]"
-									},
-									"linkedServiceName": {
-										"referenceName": "Control",
-										"type": "LinkedServiceReference"
+										"pipeline": {
+											"referenceName": "PL_DailyLoad",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"PipelineName": {
+												"value": "@pipeline().parameters.PipelineName",
+												"type": "Expression"
+											},
+											"LoadType": {
+												"value": "@pipeline().parameters.LoadType",
+												"type": "Expression"
+											},
+											"LastTransactionalDate": {
+												"value": "@pipeline().parameters.LastTransactionalDate",
+												"type": "Expression"
+											}
+										}
 									}
 								}
 							]
@@ -1219,6 +1256,9 @@
 							"name": "Inactive Entities",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
@@ -1274,6 +1314,9 @@
 									"name": "Full Load - Post",
 									"type": "ExecutePipeline",
 									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"pipeline": {
@@ -1302,6 +1345,9 @@
 									"name": "Daily Load - Post",
 									"type": "ExecutePipeline",
 									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
 										"pipeline": {
