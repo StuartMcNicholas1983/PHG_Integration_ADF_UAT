@@ -2392,12 +2392,12 @@
 																		},
 																		{
 																			"source": {
-																				"name": "phg_age",
+																				"name": "phg_calculatedage",
 																				"type": "Int32",
 																				"physicalType": "Int32"
 																			},
 																			"sink": {
-																				"name": "phg_age",
+																				"name": "phg_calculatedage",
 																				"type": "Int32"
 																			}
 																		},
